@@ -1,17 +1,39 @@
 {
-  "name": "ai-studio-applet",
+  "name": "local-vercel-board-desktop",
   "version": "0.1.0",
+  "description": "Open-source retro Windows 95/98 multi-agent desktop & local Vercel Board (SPEC.md) server/CLI by Iván Olivares.",
   "private": true,
+  "license": "Apache-2.0",
+  "author": {
+    "name": "Iván Olivares",
+    "url": "https://iolivares.com"
+  },
+  "homepage": "https://iolivares.com",
+  "keywords": [
+    "vercel-board",
+    "local-vercel-board",
+    "lvb",
+    "multi-agent",
+    "claude-code",
+    "grok",
+    "gemini",
+    "antigravity",
+    "cliui",
+    "open-source"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test": "npx --yes tsx --test lib/board-logic.test.ts lib/cmd-simulator.test.ts lib/lvb-runner.test.ts && node --test packages/local-vercel-board/test/lvb.test.mjs",
+    "lvb": "node packages/local-vercel-board/bin/lvb.mjs",
     "clean": "next clean"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
     "@hookform/resolvers": "^5.2.1",
+    "@poppinss/cliui": "^6.8.1",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

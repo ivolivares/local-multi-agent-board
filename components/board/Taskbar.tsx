@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Triangle, Volume2, VolumeX } from 'lucide-react';
+import { SlidersHorizontal, Triangle, Volume2, VolumeX } from 'lucide-react';
 
 export interface TaskbarButtonItem {
   id: string;
@@ -22,6 +22,7 @@ interface TaskbarProps {
   onTaskbarButtonClick: (id: string) => void;
   onToggleCliStatus: () => void;
   onToggleSound: () => void;
+  onOpenSettings: () => void;
 }
 
 function formatDigitalClock(d: Date): string {
@@ -44,6 +45,7 @@ export function Taskbar({
   onTaskbarButtonClick,
   onToggleCliStatus,
   onToggleSound,
+  onOpenSettings,
 }: TaskbarProps) {
   const [clockText, setClockText] = useState<string>('');
 
@@ -60,7 +62,7 @@ export function Taskbar({
   return (
     <footer
       aria-label="Desktop Taskbar"
-      className="fixed bottom-0 left-0 right-0 z-[100] flex h-[34px] items-center justify-between gap-1.5 bg-[#c0c0c0] border-t-2 border-t-[#ffffff] px-1.5"
+      className="win98-surface fixed bottom-0 left-0 right-0 z-[100] flex h-[34px] items-center justify-between gap-1.5 border-t-2 border-t-[#ffffff] px-1.5"
     >
       <div className="flex items-center gap-1 min-w-0 flex-1 overflow-x-auto">
         <button
@@ -107,8 +109,21 @@ export function Taskbar({
         ))}
       </div>
 
-      {/* System Tray: Sound Toggle, Live Connected CLI Agents Status, Persistent Digital Clock */}
-      <div className="win98-sunken-gray hidden sm:inline-flex items-center gap-1.5 px-2 h-[26px] text-[12px] text-[#000000] tabular-nums whitespace-nowrap shrink-0">
+      {/* System Tray: Settings, Sound Toggle, Live Connected CLI Agents Status, Persistent Digital Clock */}
+      <div className="win98-sunken-gray hidden sm:inline-flex items-center gap-1.5 px-2 h-[26px] text-[12px] tabular-nums whitespace-nowrap shrink-0">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenSettings();
+          }}
+          aria-label="Open Desktop Settings"
+          title="Display Settings & Retro Color Schemes"
+          className="inline-flex items-center justify-center h-[20px] w-[20px] hover:opacity-80 focus-visible:outline-1 focus-visible:outline-black"
+        >
+          <SlidersHorizontal size={12} />
+        </button>
+
         <button
           type="button"
           onClick={(e) => {
@@ -120,9 +135,9 @@ export function Taskbar({
             soundEnabled ? 'Mute message ping sound' : 'Unmute message ping sound'
           }
           title={soundEnabled ? 'Message ping: On' : 'Message ping: Muted'}
-          className="inline-flex items-center justify-center h-[20px] w-[20px] hover:bg-[#d6d6d6] focus-visible:outline-1 focus-visible:outline-black"
+          className="inline-flex items-center justify-center h-[20px] w-[20px] hover:opacity-80 focus-visible:outline-1 focus-visible:outline-black"
         >
-          {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} className="text-[#666666]" />}
+          {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} className="opacity-60" />}
         </button>
 
         <span className="h-3.5 w-[1px] bg-[#808080]" aria-hidden="true" />

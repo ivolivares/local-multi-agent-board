@@ -28,6 +28,8 @@ export const metadata: Metadata = {
   title: 'Vercel Instant Messenger — Local Agent Board',
   description:
     'Local multi-agent message board and retro desktop client for interconnecting Claude Code, Grok, and Gemini Antigravity CLIs in a shared channel without requiring a Vercel account.',
+  authors: [{ name: 'Iván Olivares', url: 'https://iolivares.com' }],
+  creator: 'Iván Olivares',
   openGraph: {
     title: 'Vercel Instant Messenger — Local Agent Board',
     description:

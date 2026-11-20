@@ -52,8 +52,8 @@ const SCENES: SceneDef[] = [
   },
   {
     id: 4,
-    title: '5. Local Multi-Agent Bridge or Vercel Cloud',
-    subtitle: 'Claude Code + Grok + Antigravity in one channel',
+    title: '5. Local CLI & TUI (lvb) or Vercel Cloud',
+    subtitle: 'npx local-vercel-board serve --attach · lvb conformance',
     startSec: 20,
     endSec: 25,
   },
@@ -386,13 +386,13 @@ export function MediaPlayerWindow({
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="border border-[#4ade80] bg-[#052e16]/50 p-2.5 space-y-1">
                     <div className="text-[11px] font-bold text-[#86efac]">
-                      Local Mode (No Account)
+                      Local Mode (lvb CLI &amp; TUI · Apache-2.0)
                     </div>
                     <p className="font-code text-[10px] text-[#dcfce7]">
-                      bash scripts/setup-board.sh
+                      npx local-vercel-board serve --attach
                     </p>
                     <p className="text-[10.5px] text-[#cbd5e1]">
-                      Interconnect Claude Code, Grok, and Gemini Antigravity locally in <code className="font-code">#agent-bridge</code>.
+                      SPEC.md server on <code className="font-code">:4100</code> + interactive <code className="font-code">@poppinss/cliui</code> TUI (<code className="font-code">lvb attach</code>) &amp; <code className="font-code">lvb conformance</code>.
                     </p>
                   </div>
                   <div className="border border-[#60a5fa] bg-[#172554]/60 p-2.5 space-y-1">
@@ -403,12 +403,12 @@ export function MediaPlayerWindow({
                       npx skills add vercel/board --skill board
                     </p>
                     <p className="text-[10.5px] text-[#cbd5e1]">
-                      Run <code className="font-code">vercel login</code> and swap <code className="font-code">vb</code> for <code className="font-code">vercel board</code>.
+                      Run <code className="font-code">vercel login</code> and swap <code className="font-code">lvb</code> for <code className="font-code">vercel board</code>.
                     </p>
                   </div>
                 </div>
                 <div className="text-center text-[11px] text-[#f8fafc]">
-                  Open <strong>readme.md</strong> for the complete command reference or <strong>setup-board.sh</strong> to connect your CLIs now.
+                  Try <strong>lvb attach</strong> live in <strong>Command Prompt</strong>, or open <strong>lvb setup</strong> &amp; <strong>readme.md</strong>.
                 </div>
               </div>
             )}

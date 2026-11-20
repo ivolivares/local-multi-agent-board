@@ -1,0 +1,27 @@
+Local Vercel Board (`local-vercel-board` / `lvb`) & Desktop Client
+Created and licensed under the Apache License, Version 2.0
+by Iván Olivares (https://iolivares.com)
+
+================================================================================
+OPEN-SOURCE ATTRIBUTION & THIRD-PARTY NOTICES
+================================================================================
+
+1. Author & Licensor
+   Iván Olivares — https://iolivares.com
+   License: Apache License, Version 2.0 (see LICENSE)
+
+2. Vercel Board Protocol & Specification
+   Original repository: https://github.com/vercel/board
+   Specification:       https://github.com/vercel/board/blob/main/SPEC.md
+   License:             Apache License, Version 2.0
+
+   This project is an independent, open-source local implementation inspired by
+   and aligned with the Vercel Board v1 specification (`SPEC.md`). It is not
+   affiliated with, sponsored by, or officially endorsed by Vercel Inc.
+   "Vercel" is a trademark of Vercel Inc., referenced solely to describe
+   protocol compatibility and origin under Section 6 of the Apache License 2.0.
+
+3. @poppinss/cliui
+   Original repository: https://github.com/poppinss/cliui
+   License:             MIT License
+   Used for terminal tables, stickers, instructions, and interactive CLI output.

@@ -1,8 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Check, Copy, Download, Play } from 'lucide-react';
-import { generateCliSnippets, generateSetupScript } from '@/lib/board-logic';
+import { Check, Copy, Download, Play, TerminalSquare } from 'lucide-react';
+import { generateSetupScript } from '@/lib/board-logic';
 import type { Channel } from '@/lib/board-types';
 
 interface SetupScriptWindowProps {
@@ -10,6 +10,7 @@ interface SetupScriptWindowProps {
   channels: Channel[];
   activeChannel: string;
   onRunHandshake: (channelId: string) => Promise<void>;
+  onOpenCommandPrompt?: () => void;
 }
 
 export function SetupScriptWindow({
@@ -17,6 +18,7 @@ export function SetupScriptWindow({
   channels,
   activeChannel,
   onRunHandshake,
+  onOpenCommandPrompt,
 }: SetupScriptWindowProps) {
   const [selectedChannel, setSelectedChannel] = useState(
     channels.some((c) => c.id === 'agent-bridge') ? 'agent-bridge' : activeChannel
@@ -26,7 +28,7 @@ export function SetupScriptWindow({
   const [handshakeDone, setHandshakeDone] = useState(false);
 
   const origin =
-    typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+    typeof window !== 'undefined' ? window.location.origin : 'http://127.0.0.1:4100';
 
   const setupScript = useMemo(
     () =>
@@ -38,8 +40,53 @@ export function SetupScriptWindow({
     [origin, selectedChannel, boardName]
   );
 
-  const snippets = useMemo(
-    () => generateCliSnippets(origin, selectedChannel),
+  const lvbQuickCommands = useMemo(
+    () => [
+      {
+        id: 'lvb-serve-attach',
+        label: 'Start Local SPEC Server (:4100) + Interactive TUI (@poppinss/cliui)',
+        command: `npx local-vercel-board serve --port 4100 --dir .board --attach`,
+      },
+      {
+        id: 'lvb-attach',
+        label: 'Attach Interactive TUI to This Running Board',
+        command: `lvb attach --url ${origin} --channel ${selectedChannel} --as developer`,
+      },
+      {
+        id: 'lvb-setup',
+        label: 'Run Setup Wizard (Replaces setup-board.sh)',
+        command: `lvb setup --channel ${selectedChannel} --url ${origin} --handshake`,
+      },
+      {
+        id: 'lvb-conformance',
+        label: 'Verify Vercel Board v1 SPEC.md Conformance (7 Live Checks)',
+        command: `lvb conformance --url http://127.0.0.1:4100`,
+      },
+    ],
+    [origin, selectedChannel]
+  );
+
+  const agentSnippets = useMemo(
+    () => [
+      {
+        id: 'claude-code',
+        label: 'Claude Code CLI',
+        profile: 'claude-code',
+        command: `BOARD_URL=${origin}/api/board claude "Join local board #${selectedChannel} using lvb --as claude-code (sends x-board-profile). Run lvb whoami, lvb read ${selectedChannel}, post status, then lvb wait ${selectedChannel} --json to collaborate with @grok and @antigravity."`,
+      },
+      {
+        id: 'grok',
+        label: 'Grok CLI',
+        profile: 'grok',
+        command: `BOARD_URL=${origin}/api/board grok "Use lvb --as grok on #${selectedChannel}. Read recent messages, review diffs from @claude-code, claim tasks via lvb tasks claim --ready ${selectedChannel} --json, and listen with lvb wait ${selectedChannel} --json."`,
+      },
+      {
+        id: 'antigravity',
+        label: 'Gemini Antigravity CLI',
+        profile: 'antigravity',
+        command: `BOARD_URL=${origin}/api/board antigravity "Connect to local board #${selectedChannel} using lvb --as antigravity. Read ${selectedChannel}, verify UI & tests once @claude-code and @grok post, and complete tasks with lvb tasks complete."`,
+      },
+    ],
     [origin, selectedChannel]
   );
 
@@ -75,25 +122,35 @@ export function SetupScriptWindow({
   };
 
   return (
-    <div className="flex flex-1 flex-col min-h-0 bg-[#c0c0c0] p-2.5 gap-2.5 overflow-y-auto win98-scroll text-[12px]">
+    <div className="flex flex-1 flex-col min-h-0 win98-surface p-2.5 gap-2.5 overflow-y-auto win98-scroll text-[12px]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#808080] pb-2">
         <div className="space-y-0.5">
-          <p className="font-bold text-[13px] text-[#000000]">
-            Local Multi-Agent CLI Bridge (No Vercel Account Required)
+          <p className="font-bold text-[13px]">
+            Local Vercel Board CLI &amp; Interactive TUI (<code>local-vercel-board</code> / <code>lvb</code>)
           </p>
-          <p className="text-[11px] text-[#333333]">
-            Run <code className="font-code bg-white px-1">bash scripts/setup-board.sh</code> locally to connect Claude Code, Grok CLI, and Gemini Antigravity CLI into a single channel.
+          <p className="text-[11px] opacity-85">
+            Open-source Apache-2.0 CLI by{' '}
+            <a
+              href="https://iolivares.com"
+              target="_blank"
+              rel="noreferrer"
+              className="underline font-bold text-[#000080]"
+            >
+              Iván Olivares (iolivares.com)
+            </a>{' '}
+            · aligned with <strong>vercel/board SPEC.md</strong> &amp;{' '}
+            <code className="font-code">@poppinss/cliui</code>.
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <label className="flex items-center gap-1 text-[11px]">
             <span>Channel:</span>
             <select
               aria-label="Target channel for setup script"
               value={selectedChannel}
               onChange={(e) => setSelectedChannel(e.target.value)}
-              className="bg-white border border-[#808080] px-1.5 py-0.5 text-[11px]"
+              className="bg-white text-black border border-[#808080] px-1.5 py-0.5 text-[11px]"
             >
               {channels.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -102,6 +159,16 @@ export function SetupScriptWindow({
               ))}
             </select>
           </label>
+          {onOpenCommandPrompt && (
+            <button
+              type="button"
+              onClick={onOpenCommandPrompt}
+              className="win98-button inline-flex items-center gap-1 px-2 py-1 text-[11px] font-bold whitespace-nowrap"
+            >
+              <TerminalSquare size={11} />
+              Try lvb TUI Here
+            </button>
+          )}
           <button
             type="button"
             disabled={runningHandshake}
@@ -120,22 +187,46 @@ export function SetupScriptWindow({
         </div>
       )}
 
-      {/* 3 Agent CLI Launch Snippets */}
+      {/* 1. lvb CLI & @poppinss/cliui TUI Quick Commands */}
       <div className="space-y-1.5">
-        <div className="font-bold text-[12px] text-[#000080]">
-          1. Connect Each Agent CLI to #{selectedChannel}
+        <div className="font-bold text-[12px]">
+          1. Run the Open-Source <code>lvb</code> CLI &amp; Interactive TUI
         </div>
         <div className="grid grid-cols-1 gap-1.5">
-          {snippets.map((item) => (
-            <div
-              key={item.id}
-              className="win98-raised p-2 space-y-1"
-            >
+          {lvbQuickCommands.map((item) => (
+            <div key={item.id} className="win98-raised p-2 space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-bold text-[11px] text-[#000000]">
+                <span className="font-bold text-[11px]">{item.label}</span>
+                <button
+                  type="button"
+                  onClick={() => void copyText(item.id, item.command)}
+                  className="win98-button inline-flex items-center gap-1 px-2 py-0.5 text-[11px] whitespace-nowrap"
+                >
+                  {copiedId === item.id ? <Check size={11} /> : <Copy size={11} />}
+                  {copiedId === item.id ? 'Copied' : 'Copy'}
+                </button>
+              </div>
+              <pre className="win98-sunken p-1.5 font-code text-[10.5px] leading-snug whitespace-pre-wrap break-all select-text">
+                {item.command}
+              </pre>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 2. Agent CLI Launch Prompts */}
+      <div className="space-y-1.5">
+        <div className="font-bold text-[12px]">
+          2. Connect Coding Agent CLIs to #{selectedChannel} (via <code>BOARD_URL</code> &amp; <code>--as</code>)
+        </div>
+        <div className="grid grid-cols-1 gap-1.5">
+          {agentSnippets.map((item) => (
+            <div key={item.id} className="win98-raised p-2 space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-bold text-[11px]">
                   {item.label}{' '}
-                  <span className="font-normal text-[#555555]">
-                    (--as {item.profile})
+                  <span className="font-normal opacity-75">
+                    (x-board-profile: {item.profile})
                   </span>
                 </span>
                 <button
@@ -147,7 +238,7 @@ export function SetupScriptWindow({
                   {copiedId === item.id ? 'Copied' : 'Copy'}
                 </button>
               </div>
-              <pre className="win98-sunken bg-white p-1.5 font-code text-[10.5px] leading-snug text-[#111111] whitespace-pre-wrap break-all select-text">
+              <pre className="win98-sunken p-1.5 font-code text-[10.5px] leading-snug whitespace-pre-wrap break-all select-text">
                 {item.command}
               </pre>
             </div>
@@ -155,11 +246,11 @@ export function SetupScriptWindow({
         </div>
       </div>
 
-      {/* Full setup-board.sh script */}
-      <div className="flex-1 min-h-[170px] flex flex-col gap-1">
+      {/* 3. Legacy Bash Wrapper (delegates to `lvb setup`) */}
+      <div className="flex-1 min-h-[150px] flex flex-col gap-1">
         <div className="flex items-center justify-between gap-2">
-          <span className="font-bold text-[12px] text-[#000080]">
-            2. Setup Script (scripts/setup-board.sh)
+          <span className="font-bold text-[12px]">
+            3. Optional Bash Wrapper (<code>scripts/setup-board.sh</code> → delegates to <code>lvb setup</code>)
           </span>
           <div className="flex items-center gap-1.5">
             <button
@@ -180,7 +271,7 @@ export function SetupScriptWindow({
             </button>
           </div>
         </div>
-        <pre className="flex-1 min-h-[160px] win98-sunken-dark text-[#dcfce7] p-2.5 font-code text-[11px] leading-relaxed overflow-auto win98-scroll select-text">
+        <pre className="flex-1 min-h-[130px] win98-sunken-dark text-[#dcfce7] p-2.5 font-code text-[11px] leading-relaxed overflow-auto win98-scroll select-text">
           {setupScript}
         </pre>
       </div>

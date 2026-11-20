@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
+  BookOpen,
   FileCode2,
   FileText,
   Film,
@@ -10,10 +11,14 @@ import {
   LayoutGrid,
   Layers,
   Minimize2,
+  Play,
   RotateCcw,
+  SlidersHorizontal,
+  Terminal,
   TerminalSquare,
   Triangle,
 } from 'lucide-react';
+import { buildSimulatedAgentReplies } from '@/lib/agent-emulator';
 import type {
   Actor,
   Attachment,
@@ -21,14 +26,22 @@ import type {
   MessageFormatting,
   TaskActionType,
 } from '@/lib/board-types';
+import {
+  DEFAULT_THEME_ID,
+  isDesktopThemeId,
+  type DesktopThemeId,
+} from '@/lib/desktop-themes';
 import { playMessagePing } from '@/lib/sound';
 import { AgentInfoWindow } from './AgentInfoWindow';
 import { BoardDialogs, type ActiveDialog } from './BoardDialogs';
 import { BuddyListWindow, type BuddyTab } from './BuddyListWindow';
 import { CliTerminalWindow } from './CliTerminalWindow';
+import { CommandPromptWindow } from './CommandPromptWindow';
+import { ExplainLikeIm5Window } from './ExplainLikeIm5Window';
 import { MediaPlayerWindow } from './MediaPlayerWindow';
 import { MentionAlertWindow } from './MentionAlertWindow';
 import { ReadmeWindow } from './ReadmeWindow';
+import { SettingsWindow } from './SettingsWindow';
 import { SetupScriptWindow } from './SetupScriptWindow';
 import { Taskbar, type TaskbarButtonItem } from './Taskbar';
 import { ThreadChatWindow } from './ThreadChatWindow';
@@ -42,7 +55,10 @@ type WinId =
   | 'terminal'
   | 'setup'
   | 'readme'
-  | 'media';
+  | 'media'
+  | 'cmd'
+  | 'settings'
+  | 'eli5';
 
 interface WinState {
   open: boolean;
@@ -55,10 +71,10 @@ interface WinState {
 function buildInitialWindows(viewportWidth: number): Record<WinId, WinState> {
   const w = Math.max(960, viewportWidth || 1440);
   const iconCol = 114;
-  const usableW = Math.min(w - iconCol - 24, 1320);
-  const leftW = 316;
-  const rightX = leftW + 28;
-  const rightW = Math.max(560, usableW - leftW - 14);
+  const usableW = Math.min(w - iconCol - 32, 1300);
+  const leftW = 304;
+  const rightX = leftW + 34;
+  const rightW = Math.min(820, Math.max(580, usableW - leftW - 22));
   const bottomLeftW = Math.floor(rightW * 0.44);
   const bottomRightW = rightW - bottomLeftW - 12;
 
@@ -67,39 +83,39 @@ function buildInitialWindows(viewportWidth: number): Record<WinId, WinState> {
       open: true,
       minimized: false,
       maximized: false,
-      rect: { x: 14, y: 12, width: leftW, height: 500 },
+      rect: { x: 20, y: 20, width: leftW, height: 590 },
       z: 10,
     },
     agentInfo: {
-      open: true,
+      open: false,
       minimized: false,
       maximized: false,
-      rect: { x: 14, y: 524, width: leftW, height: 320 },
+      rect: { x: 20, y: 520, width: leftW, height: 310 },
       z: 11,
     },
     chat: {
       open: true,
       minimized: false,
       maximized: false,
-      rect: { x: rightX, y: 12, width: rightW, height: 616 },
+      rect: { x: rightX, y: 20, width: rightW, height: 640 },
       z: 14,
     },
     mention: {
-      open: true,
+      open: false,
       minimized: false,
       maximized: false,
-      rect: { x: rightX, y: 640, width: bottomLeftW, height: 204 },
+      rect: { x: rightX, y: 672, width: bottomLeftW, height: 184 },
       z: 12,
     },
     terminal: {
-      open: true,
+      open: false,
       minimized: false,
       maximized: false,
       rect: {
-        x: rightX + bottomLeftW + 12,
-        y: 640,
-        width: bottomRightW,
-        height: 204,
+        x: Math.max(60, Math.floor((w - 660) / 2)),
+        y: 120,
+        width: Math.max(540, bottomRightW),
+        height: 360,
       },
       z: 13,
     },
@@ -123,6 +139,27 @@ function buildInitialWindows(viewportWidth: number): Record<WinId, WinState> {
       maximized: false,
       rect: { x: Math.max(48, Math.floor((w - 620) / 2)), y: 68, width: 620, height: 470 },
       z: 17,
+    },
+    cmd: {
+      open: false,
+      minimized: false,
+      maximized: false,
+      rect: { x: Math.max(40, Math.floor((w - 780) / 2)), y: 64, width: 780, height: 500 },
+      z: 18,
+    },
+    settings: {
+      open: false,
+      minimized: false,
+      maximized: false,
+      rect: { x: Math.max(56, Math.floor((w - 460) / 2)), y: 52, width: 460, height: 600 },
+      z: 19,
+    },
+    eli5: {
+      open: false,
+      minimized: false,
+      maximized: false,
+      rect: { x: Math.max(46, Math.floor((w - 650) / 2)), y: 46, width: 650, height: 590 },
+      z: 20,
     },
   };
 }
@@ -148,6 +185,9 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
   const [goMenuOpen, setGoMenuOpen] = useState<boolean>(false);
   const [cliStatusOpen, setCliStatusOpen] = useState<boolean>(false);
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [themeId, setThemeId] = useState<DesktopThemeId>(DEFAULT_THEME_ID);
+  const [autoReplyAgents, setAutoReplyAgents] = useState<boolean>(true);
+  const [swarmRunning, setSwarmRunning] = useState<boolean>(false);
   const [streamStatus, setStreamStatus] = useState<
     'connecting' | 'connected' | 'reconnecting'
   >('connecting');
@@ -157,16 +197,49 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
     buildInitialWindows(1440)
   );
 
-  const zCounterRef = useRef<number>(20);
+  const zCounterRef = useRef<number>(24);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const seenMessageIdsRef = useRef<Set<string>>(
     new Set(initialState.messages.map((m) => m.id))
   );
   const soundEnabledRef = useRef<boolean>(soundEnabled);
+  const replyTimersRef = useRef<Array<ReturnType<typeof setTimeout>>>([]);
 
   useEffect(() => {
     soundEnabledRef.current = soundEnabled;
   }, [soundEnabled]);
+
+  // Restore saved retro desktop theme on mount without hydration mismatch
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        const saved = window.localStorage.getItem('vb-desktop-theme');
+        if (saved && isDesktopThemeId(saved)) {
+          setThemeId(saved);
+        }
+      } catch {
+        // ignore storage restrictions
+      }
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Clean up any scheduled simulated agent reply timers on unmount
+  useEffect(() => {
+    const timers = replyTimersRef.current;
+    return () => {
+      timers.forEach((id) => clearTimeout(id));
+    };
+  }, []);
+
+  const handleSelectTheme = useCallback((nextTheme: DesktopThemeId) => {
+    setThemeId(nextTheme);
+    try {
+      window.localStorage.setItem('vb-desktop-theme', nextTheme);
+    } catch {
+      // ignore storage restrictions
+    }
+  }, []);
 
   // Play subtle Web Audio API ping whenever a brand-new chat message arrives
   useEffect(() => {
@@ -199,6 +272,9 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
             setup: { ...prev.setup, rect: fresh.setup.rect },
             readme: { ...prev.readme, rect: fresh.readme.rect },
             media: { ...prev.media, rect: fresh.media.rect },
+            cmd: { ...prev.cmd, rect: fresh.cmd.rect },
+            settings: { ...prev.settings, rect: fresh.settings.rect },
+            eli5: { ...prev.eli5, rect: fresh.eli5.rect },
           };
         });
       }
@@ -414,18 +490,138 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
     asActor: string
   ) => {
     if (!activeThread) return;
+    const channelId = activeThread.channelId;
+    const threadId = activeThread.id;
     await fetch('/api/board/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        channelId: activeThread.channelId,
-        threadId: activeThread.id,
+        channelId,
+        threadId,
         body,
         as: asActor,
         formatting,
       }),
     });
     await refreshState();
+
+    // Interactive web starter emulation: mentioned CLI agents respond live in-thread
+    if (autoReplyAgents) {
+      const replies = buildSimulatedAgentReplies(body, asActor, channelId, state.actors);
+      for (const reply of replies) {
+        const timerId = setTimeout(async () => {
+          try {
+            await fetch('/api/board/messages', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                channelId,
+                threadId,
+                body: reply.body,
+                as: reply.actorName,
+              }),
+            });
+            await refreshState();
+          } catch {
+            // ignore transient network errors
+          }
+        }, reply.delayMs);
+        replyTimersRef.current.push(timerId);
+      }
+    }
+  };
+
+  // Interactive 3-agent Vercel Board Swarm Demo (create -> claim lease -> patch -> fuzz -> verify & complete)
+  const handleRunSwarmDemo = async () => {
+    if (swarmRunning || !activeThread) return;
+    setSwarmRunning(true);
+    setGoMenuOpen(false);
+    const channelId = activeThread.channelId;
+    const threadId = activeThread.id;
+    const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+    try {
+      // Step 1: Queue a ready task on the board
+      const createRes = await fetch('/api/board/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'create',
+          channelId,
+          threadId,
+          title: 'Verify rate-limit backoff & SSE reconnect on local bridge',
+          as: state.currentUser,
+          leaseMinutes: 5,
+        }),
+      });
+      const createJson = (await createRes.json()) as {
+        data?: { task?: { id: string } };
+      };
+      const taskId = createJson.data?.task?.id;
+      await refreshState();
+      await wait(650);
+
+      // Step 2: claude-code claims the 5-minute lease and posts patch handoff
+      if (taskId) {
+        await fetch(`/api/board/tasks/${encodeURIComponent(taskId)}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'claim', as: 'claude-code', leaseMinutes: 5 }),
+        });
+      }
+      await fetch('/api/board/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channelId,
+          threadId,
+          body: `Claimed task ${taskId ? `#${taskId}` : ''} (5m lease). Patched exponential backoff in stream bridge — @grok please fuzz reconnect races.`,
+          as: 'claude-code',
+        }),
+      });
+      await refreshState();
+      await wait(850);
+
+      // Step 3: grok fuzzes edge cases and tags @antigravity
+      await fetch('/api/board/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channelId,
+          threadId,
+          body: `Fuzzed 250 concurrent lease renewals & reconnect drops: 0 claim_lost races. @antigravity ready for browser smoke check.`,
+          as: 'grok',
+        }),
+      });
+      await refreshState();
+      await wait(850);
+
+      // Step 4: antigravity verifies UI and settles the task
+      if (taskId) {
+        await fetch(`/api/board/tasks/${encodeURIComponent(taskId)}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'complete',
+            as: 'antigravity',
+            note: 'Verified in headless Chromium (0 console errors)',
+          }),
+        });
+      }
+      await fetch('/api/board/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          channelId,
+          threadId,
+          body: `Browser verification green! Settled task ${taskId ? `#${taskId}` : ''} as completed. @${state.currentUser} ready to merge.`,
+          as: 'antigravity',
+        }),
+      });
+      await refreshState();
+    } finally {
+      setSwarmRunning(false);
+    }
   };
 
   const handleSendAttachment = async (attachment: Attachment, caption: string) => {
@@ -663,7 +859,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       ? [
           {
             id: 'setup',
-            label: 'setup-board.sh',
+            label: 'lvb setup',
             mobileLabel: 'Setup',
             active: isMobile
               ? mobileWin === 'setup'
@@ -701,11 +897,54 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
           },
         ]
       : []),
+    ...(windows.cmd.open
+      ? [
+          {
+            id: 'cmd',
+            label: 'Command Prompt',
+            mobileLabel: 'CMD',
+            active: isMobile
+              ? mobileWin === 'cmd'
+              : activeWin === 'cmd' &&
+                windows.cmd.open &&
+                !windows.cmd.minimized,
+          },
+        ]
+      : []),
+    ...(windows.settings.open
+      ? [
+          {
+            id: 'settings',
+            label: 'Settings',
+            mobileLabel: 'Theme',
+            active: isMobile
+              ? mobileWin === 'settings'
+              : activeWin === 'settings' &&
+                windows.settings.open &&
+                !windows.settings.minimized,
+          },
+        ]
+      : []),
+    ...(windows.eli5.open
+      ? [
+          {
+            id: 'eli5',
+            label: "Explain Like I'm 5",
+            mobileLabel: 'ELI5',
+            active: isMobile
+              ? mobileWin === 'eli5'
+              : activeWin === 'eli5' &&
+                windows.eli5.open &&
+                !windows.eli5.minimized,
+          },
+        ]
+      : []),
   ];
 
   return (
     <main
-      className="relative h-screen w-screen overflow-hidden bg-[#008080]"
+      data-theme={themeId}
+      className="win98-desktop relative h-screen w-screen overflow-hidden"
       onClick={() => {
         if (goMenuOpen) setGoMenuOpen(false);
         if (cliStatusOpen) setCliStatusOpen(false);
@@ -715,34 +954,49 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       {!isMobile && (
         <nav
           aria-label="Desktop shortcuts"
-          className="fixed right-3 top-4 z-[5] flex w-[96px] flex-col items-center gap-4"
+          className="fixed right-3 top-2.5 z-[5] flex w-[104px] flex-col items-center gap-2"
         >
           <button
             type="button"
-            onClick={() => focusWindow('setup')}
-            className="group flex flex-col items-center gap-1 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+            onClick={() => focusWindow('eli5')}
+            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
           >
-            <Folder
-              size={34}
+            <BookOpen
+              size={28}
               strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
             />
-            <span className="px-1 text-[11px] leading-tight text-white group-hover:bg-[#000080]">
-              {state.boardName}
+            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight text-center group-hover:bg-[#000080]">
+              Explain Like I&apos;m 5
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => focusWindow('cmd')}
+            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+          >
+            <Terminal
+              size={28}
+              strokeWidth={1.6}
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
+            />
+            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight text-center group-hover:bg-[#000080]">
+              Command Prompt
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => focusWindow('terminal')}
-            className="group flex flex-col items-center gap-1 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
           >
             <TerminalSquare
-              size={34}
+              size={28}
               strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
             />
-            <span className="px-1 text-[11px] leading-tight text-white group-hover:bg-[#000080]">
+            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
               vb tail
             </span>
           </button>
@@ -750,29 +1004,29 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
           <button
             type="button"
             onClick={() => focusWindow('setup')}
-            className="group flex flex-col items-center gap-1 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
           >
             <FileCode2
-              size={34}
+              size={28}
               strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
             />
-            <span className="px-1 text-[11px] leading-tight text-white group-hover:bg-[#000080]">
-              setup-board.sh
+            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
+              lvb setup
             </span>
           </button>
 
           <button
             type="button"
             onClick={() => focusWindow('readme')}
-            className="group flex flex-col items-center gap-1 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
           >
             <FileText
-              size={34}
+              size={28}
               strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
             />
-            <span className="px-1 text-[11px] leading-tight text-white group-hover:bg-[#000080]">
+            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
               readme.md
             </span>
           </button>
@@ -780,15 +1034,30 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
           <button
             type="button"
             onClick={() => focusWindow('media')}
-            className="group flex flex-col items-center gap-1 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
           >
             <Film
-              size={34}
+              size={28}
               strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
             />
-            <span className="px-1 text-[11px] leading-tight text-white group-hover:bg-[#000080]">
+            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
               Intro.mp4
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => focusWindow('settings')}
+            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+          >
+            <SlidersHorizontal
+              size={28}
+              strokeWidth={1.6}
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
+            />
+            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
+              Settings
             </span>
           </button>
         </nav>
@@ -912,6 +1181,8 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               setDialog({ type: 'preview-attachment', attachment: att })
             }
             onOpenInfo={() => focusWindow('agentInfo')}
+            onRunSwarmDemo={handleRunSwarmDemo}
+            swarmRunning={swarmRunning}
           />
         </Win98Window>
       )}
@@ -969,11 +1240,11 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         </Win98Window>
       )}
 
-      {/* Window 6: Board Setup Script & Multi-Agent CLI Interconnect */}
+      {/* Window 6: lvb CLI & Interactive TUI Setup */}
       {shouldRenderWindow('setup') && (
         <Win98Window
           id="setup"
-          title="setup-board.sh — Connect Claude Code, Grok & Antigravity"
+          title="lvb setup — Local Vercel Board CLI & TUI"
           active={activeWin === 'setup'}
           zIndex={windows.setup.z}
           rect={windows.setup.rect}
@@ -991,6 +1262,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
             channels={state.channels}
             activeChannel={activeThread?.channelId || 'agent-bridge'}
             onRunHandshake={handleRunHandshake}
+            onOpenCommandPrompt={() => focusWindow('cmd')}
           />
         </Win98Window>
       )}
@@ -1043,6 +1315,92 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         </Win98Window>
       )}
 
+      {/* Window 9: MS-DOS Command Prompt — Local CLI Simulator */}
+      {shouldRenderWindow('cmd') && (
+        <Win98Window
+          id="cmd"
+          title="Command Prompt — C:\VERCEL-BOARD"
+          active={activeWin === 'cmd'}
+          zIndex={windows.cmd.z}
+          rect={windows.cmd.rect}
+          maximized={windows.cmd.maximized}
+          isMobile={isMobile}
+          showMaximize
+          onFocus={focusWindow}
+          onMove={moveWindow}
+          onMinimize={minimizeWindow}
+          onToggleMaximize={toggleMaximize}
+          onClose={closeWindow}
+        >
+          <CommandPromptWindow
+            state={state}
+            activeChannel={activeThread?.channelId || 'agent-bridge'}
+            onRunVbCommand={handleRunCliCommand}
+            onRunSwarmDemo={handleRunSwarmDemo}
+            onSelectTheme={handleSelectTheme}
+          />
+        </Win98Window>
+      )}
+
+      {/* Window 10: Settings — Retro Desktop Themes & Board Emulator */}
+      {shouldRenderWindow('settings') && (
+        <Win98Window
+          id="settings"
+          title="Settings — Display Properties"
+          active={activeWin === 'settings'}
+          zIndex={windows.settings.z}
+          rect={windows.settings.rect}
+          isMobile={isMobile}
+          onFocus={focusWindow}
+          onMove={moveWindow}
+          onMinimize={minimizeWindow}
+          onClose={closeWindow}
+        >
+          <SettingsWindow
+            themeId={themeId}
+            soundEnabled={soundEnabled}
+            autoReplyAgents={autoReplyAgents}
+            swarmRunning={swarmRunning}
+            onSelectTheme={handleSelectTheme}
+            onToggleSound={() => {
+              setSoundEnabled((prev) => {
+                const next = !prev;
+                if (next) playMessagePing();
+                return next;
+              });
+            }}
+            onToggleAutoReply={() => setAutoReplyAgents((v) => !v)}
+            onRunSwarmDemo={handleRunSwarmDemo}
+            onClose={() => closeWindow('settings')}
+          />
+        </Win98Window>
+      )}
+
+      {/* Window 11: Explain Like I'm 5 — Interactive Cartoon SVG Guide */}
+      {shouldRenderWindow('eli5') && (
+        <Win98Window
+          id="eli5"
+          title="Explain Like I'm 5"
+          active={activeWin === 'eli5'}
+          zIndex={windows.eli5.z}
+          rect={windows.eli5.rect}
+          maximized={windows.eli5.maximized}
+          isMobile={isMobile}
+          showMaximize
+          onFocus={focusWindow}
+          onMove={moveWindow}
+          onMinimize={minimizeWindow}
+          onToggleMaximize={toggleMaximize}
+          onClose={closeWindow}
+        >
+          <ExplainLikeIm5Window
+            onOpenSetup={() => focusWindow('setup')}
+            onOpenCommandPrompt={() => focusWindow('cmd')}
+            onOpenIntroVideo={() => focusWindow('media')}
+          />
+        </Win98Window>
+      )}
+
       {/* Modal Dialogs */}
       {activeThread && (
         <BoardDialogs
@@ -1068,7 +1426,49 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               Vercel Board
             </span>
           </div>
-          <div className="flex-1 py-1 text-[12px] bg-[#c0c0c0]">
+          <div className="win98-surface flex-1 py-1 text-[12px]">
+            <button
+              type="button"
+              onClick={() => {
+                setGoMenuOpen(false);
+                focusWindow('eli5');
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <BookOpen size={14} />
+              <span>Explain Like I&apos;m 5 (Cartoon Guide)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGoMenuOpen(false);
+                focusWindow('cmd');
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <Terminal size={14} />
+              <span>Command Prompt (ping / status)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGoMenuOpen(false);
+                focusWindow('settings');
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <SlidersHorizontal size={14} />
+              <span>Settings (Retro Color Schemes)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleRunSwarmDemo()}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <Play size={14} />
+              <span>Run 3-Agent Swarm Demo</span>
+            </button>
+            <div className="my-1 border-t border-[#808080] border-b border-b-white" />
             <button
               type="button"
               onClick={() => {
@@ -1100,7 +1500,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
             >
               <FileCode2 size={14} />
-              <span>Setup Script (setup-board.sh)</span>
+              <span>Local Board CLI &amp; TUI (lvb setup)</span>
             </button>
             <button
               type="button"
@@ -1298,6 +1698,11 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
             if (next) playMessagePing();
             return next;
           });
+        }}
+        onOpenSettings={() => {
+          setGoMenuOpen(false);
+          setCliStatusOpen(false);
+          focusWindow('settings');
         }}
       />
     </main>

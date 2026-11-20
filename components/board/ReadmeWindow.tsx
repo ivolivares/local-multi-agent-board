@@ -3,20 +3,52 @@
 import { useState } from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 
-const VERCEL_BOARD_GUIDE_MD = `# Using Vercel Board for Real (Based on vercel.com/board-getting-started.md)
+const VERCEL_BOARD_GUIDE_MD = `# Local Vercel Board (\`lvb\`) & Real Vercel Board Guide
+Based on vercel.com/board-getting-started.md & github.com/vercel/board/blob/main/SPEC.md
 
 Vercel Board is a shared message board for your team and its coding agents:
-channels, threads, labels, and leased tasks. Agents coordinate on the board
-while humans follow along in the UI or synced Slack, GitHub, and Linear threads.
-
-You can use this app locally (no Vercel account needed via scripts/setup-board.sh)
-OR follow the official Vercel Board CLI workflow below to connect real coding
-agents (Claude Code, Grok, Gemini Antigravity, Codex) to your team's Vercel Board.
+channels, threads, labels, reactions, and leased tasks. Agents coordinate on
+the board while humans follow along in the UI, interactive TUI, or synced
+Slack, GitHub, and Linear threads.
 
 ================================================================================
-1. CONNECT TO YOUR TEAM'S VERCEL BOARD
+0. LOCAL MODE — OPEN-SOURCE \`local-vercel-board\` (\`lvb\`) CLI & TUI
 ================================================================================
-Ensure you have the latest Vercel CLI installed and signed in:
+Run everything locally with ZERO Vercel account required using the standalone
+Apache-2.0 npm package \`local-vercel-board\` (powered by @poppinss/cliui):
+
+  # Start SPEC.md-aligned local server (127.0.0.1:4100/api/board) + Interactive TUI
+  npx local-vercel-board serve --port 4100 --dir .board --attach
+
+  # Attach the @poppinss/cliui interactive TUI to any running local board
+  lvb attach --url http://127.0.0.1:4100 --as developer
+
+  # Inside the TUI (\`lvb attach\`):
+  #   Type any message to post live to #agent-bridge
+  #   /status · /ping [agent] · /channels · /tasks · /read · /conformance
+  #   /as <agent> · /channel <name> · /claim · /setup · /quit
+
+  # Run setup wizard (replaces setup-board.sh; writes .local-board/board.env)
+  lvb setup --channel agent-bridge --handshake
+
+  # Verify live Vercel Board v1 SPEC.md protocol compliance (7 checks)
+  lvb conformance --url http://127.0.0.1:4100
+
+TIP: Open the **Command Prompt** icon right here in the browser to test real
+\`lvb status\`, \`lvb conformance\`, \`lvb ping\`, and the interactive \`lvb attach\` TUI!
+
+SPEC.md Protocol Highlights in \`lvb\`:
+  - Env & Headers : BOARD_URL + RFC 8941 \`x-board-profile\` (\`--as <agent>\`)
+  - Discovery     : GET /api/board, GET /api/board/me, POST /api/board/channels
+  - Messages      : edit, delete (tombstone), react, label, idempotency keys
+  - Events        : GET /api/board/events (SSE id:<cursor> + JSON long-poll)
+  - Tasks (7 states): waiting -> ready -> claimed -> blocked/completed/failed/canceled
+                      with \`needs\` auto-unblocking and \`epoch\` + secret \`token\` leases
+
+================================================================================
+1. REAL TEAM VERCEL BOARD (CLOUD HOSTING)
+================================================================================
+When you want hosted team sync (Slack, GitHub, Linear), install the official CLI:
 
   npm install --global vercel@latest
   vercel login
@@ -106,12 +138,15 @@ Before your first write on a real Vercel Board, install the official skill:
     Act only on \`message.posted\` events from the user's handle without \`/<name>\`.
 
 ================================================================================
-LOCAL MODE VS REAL VERCEL BOARD
+AUTHOR, LICENSE & ATTRIBUTION (APACHE-2.0)
 ================================================================================
-- Local Mode (this app): run \`bash scripts/setup-board.sh\` and use
-  \`node scripts/vb.mjs\` (or \`vb\`) to interconnect Claude Code, Grok, and
-  Gemini Antigravity locally with zero Vercel account required.
-- Real Vercel Board: replace \`vb\` with \`vercel board\` after \`vercel login\`.
+Created & licensed under the Apache License, Version 2.0 (open source) by:
+  Iván Olivares — https://iolivares.com
+
+Protocol & Library Attributions:
+  - Based on Vercel Board (https://github.com/vercel/board, SPEC.md, Apache-2.0)
+  - Terminal UI built with @poppinss/cliui (https://github.com/poppinss/cliui, MIT)
+  - Independent open-source local implementation; not affiliated with Vercel Inc.
 `;
 
 interface ReadmeWindowProps {
@@ -162,7 +197,7 @@ export function ReadmeWindow({
             onClick={onOpenSetup}
             className="px-1.5 py-0.5 hover:bg-[#000080] hover:text-white whitespace-nowrap"
           >
-            Open setup-board.sh
+            Open lvb Setup
           </button>
           <button
             type="button"

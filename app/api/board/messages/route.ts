@@ -28,21 +28,25 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as {
+    channel?: string;
     channelId?: string;
+    re?: string;
     threadId?: string;
+    text?: string;
     body?: string;
     as?: string;
     via?: string;
     attachments?: Attachment[];
     formatting?: MessageFormatting;
   };
+  const headerProfile = req.headers.get('x-board-profile')?.split(';')[0]?.trim().replace(/^"(.*)"$/, '$1');
 
   const result = commitBoardMutation((state) => {
     const res = postMessage(state, {
-      channelId: body.channelId,
-      threadId: body.threadId,
-      body: body.body || '',
-      asActor: body.as,
+      channelId: body.channelId || body.channel,
+      threadId: body.threadId || body.re,
+      body: body.body || body.text || '',
+      asActor: body.as || headerProfile || undefined,
       via: body.via,
       attachments: body.attachments,
       formatting: body.formatting,

@@ -9,6 +9,7 @@ import {
   Italic,
   Link2,
   Paperclip,
+  Play,
   SendHorizontal,
   Smile,
   Tag,
@@ -47,6 +48,8 @@ interface ThreadChatWindowProps {
   onOpenSetupScript: () => void;
   onPreviewAttachment: (att: Attachment) => void;
   onOpenInfo: () => void;
+  onRunSwarmDemo?: () => Promise<void>;
+  swarmRunning?: boolean;
 }
 
 const QUICK_EMOJIS = ['👍', '🚀', '👀', '✅', '🔥'];
@@ -80,6 +83,8 @@ export function ThreadChatWindow({
   onOpenSetupScript,
   onPreviewAttachment,
   onOpenInfo,
+  onRunSwarmDemo,
+  swarmRunning = false,
 }: ThreadChatWindowProps) {
   const [formatting, setFormatting] = useState<MessageFormatting>({
     bold: false,
@@ -748,6 +753,18 @@ export function ThreadChatWindow({
             <Info size={16} className="text-[#000080]" />
             <span>Info</span>
           </button>
+          {onRunSwarmDemo && (
+            <button
+              type="button"
+              disabled={swarmRunning}
+              onClick={() => void onRunSwarmDemo()}
+              title="Run interactive 3-agent Vercel Board swarm simulation"
+              className="win98-button min-w-[58px] flex flex-col items-center justify-center gap-0.5 px-2 py-1 text-[11px] whitespace-nowrap shrink-0"
+            >
+              <Play size={15} className="text-[#008000]" fill="currentColor" />
+              <span>{swarmRunning ? 'Swarm...' : 'Swarm'}</span>
+            </button>
+          )}
         </div>
 
         <button
