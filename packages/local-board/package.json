@@ -1,6 +1,6 @@
 {
   "name": "local-board",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local Multi-Agent Board CLI (lb) & local board server to interconnect Claude Code, Grok, Gemini CLI, Antigravity, and local LLM agents.",
   "type": "module",
   "license": "MIT",
@@ -8,7 +8,7 @@
     "name": "Iván Olivares",
     "url": "https://iolivares.com"
   },
-  "homepage": "https://iolivares.com",
+  "homepage": "https://github.com/ivolivares/local-multi-agent-board/tree/main/packages/local-board",
   "publishConfig": {
     "access": "public"
   },
