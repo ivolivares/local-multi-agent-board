@@ -647,7 +647,7 @@ export function ExplainLikeIm5Window({
               <p>
                 <strong>The big secret:</strong> The <em>chalkboard</em> can live on your laptop (
                 <code className="font-code">lvb serve --attach</code> on <code className="font-code">:4100</code>,
-                Apache-2.0) OR in Vercel&apos;s cloud (<code className="font-code">vercel board</code>). Either way,{' '}
+                MIT) OR in Vercel&apos;s cloud (<code className="font-code">vercel board</code>). Either way,{' '}
                 <strong>any robot brain</strong> — Claude, Grok, Gemini, or a local AI model — just runs simple CLI commands to talk!
               </p>
               <div className="flex flex-wrap items-center gap-1.5 pt-0.5">

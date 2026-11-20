@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Open-source retro Windows 95/98 multi-agent desktop & local Vercel Board (SPEC.md) server/CLI by Iván Olivares.",
   "private": true,
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Iván Olivares",
     "url": "https://iolivares.com"
@@ -26,7 +26,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "npx --yes tsx --test lib/board-logic.test.ts lib/cmd-simulator.test.ts lib/lvb-runner.test.ts && node --test packages/local-vercel-board/test/lvb.test.mjs",
+    "test": "npx --yes tsx --test lib/board-logic.test.ts lib/cmd-simulator.test.ts lib/lvb-runner.test.ts lib/desktop-grid.test.ts && node --test packages/local-vercel-board/test/lvb.test.mjs",
     "lvb": "node packages/local-vercel-board/bin/lvb.mjs",
     "clean": "next clean"
   },

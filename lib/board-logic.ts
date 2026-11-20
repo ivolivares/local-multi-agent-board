@@ -609,6 +609,7 @@ export function ensureActor(
     status?: ActorStatus;
     statusMessage?: string;
     cliFlavor?: AgentCliFlavor;
+    endpointUri?: string;
   },
   now = Date.now()
 ): { actor: Actor; event: BoardEvent } {
@@ -628,6 +629,7 @@ export function ensureActor(
           ? `Connected via local CLI bridge as ${cleanName}.`
           : 'Online on local board.'),
       cliFlavor: opts.cliFlavor || inferCliFlavor(cleanName),
+      endpointUri: opts.endpointUri?.trim() || undefined,
       avatarKey: cleanName,
       activeTaskId: null,
       lastSeenAt: now,
@@ -637,6 +639,10 @@ export function ensureActor(
     if (opts.status) actor.status = opts.status;
     if (opts.statusMessage !== undefined) actor.statusMessage = opts.statusMessage;
     if (opts.via && actor.kind === 'agent') actor.via = opts.via;
+    if (opts.cliFlavor) actor.cliFlavor = opts.cliFlavor;
+    if (opts.endpointUri !== undefined) {
+      actor.endpointUri = opts.endpointUri.trim() || undefined;
+    }
     actor.lastSeenAt = now;
   }
 
@@ -657,14 +663,164 @@ export function inferCliFlavor(name: string): AgentCliFlavor {
   const lower = name.toLowerCase();
   if (lower.includes('claude')) return 'claude-code';
   if (lower.includes('grok')) return 'grok';
-  if (lower.includes('antigravity') || lower.includes('gemini')) {
-    return 'gemini-antigravity';
+  if (lower.includes('antigravity')) return 'gemini-antigravity';
+  if (lower.includes('gemini')) return 'gemini-cli';
+  if (lower.includes('codex')) return 'codex';
+  if (lower.includes('ollama') || lower.includes('llama') || lower.includes('qwen')) {
+    return 'ollama';
   }
   if (lower.includes('fix')) return 'fixer';
   if (lower.includes('scout')) return 'scout';
   if (lower.includes('deploy')) return 'deployer';
   if (lower.includes('review')) return 'reviewer';
   return 'custom';
+}
+
+export interface LocalAgentRegistrationInput {
+  name: string;
+  cliFlavor: AgentCliFlavor;
+  endpointUri: string;
+  via?: string;
+  statusMessage?: string;
+}
+
+const ALLOWED_AGENT_PROTOCOLS = new Set(['http:', 'https:', 'ws:', 'wss:', 'stdio:']);
+
+export function validateLocalAgentInput(
+  input: Partial<LocalAgentRegistrationInput>
+): { ok: true; cleanName: string; cleanUri: string } | { ok: false; code: string; reason: string } {
+  const rawName = String(input.name || '').trim();
+  if (!rawName) {
+    return {
+      ok: false,
+      code: 'invalid_agent_name',
+      reason: 'Agent name is required (e.g. claude-code-2 or gemini-cli).',
+    };
+  }
+  const cleanName = rawName
+    .toLowerCase()
+    .replace(/^@/, '')
+    .replace(/[^a-z0-9._-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 32);
+  if (!cleanName || !/^[a-z0-9]/.test(cleanName)) {
+    return {
+      ok: false,
+      code: 'invalid_agent_name',
+      reason: 'Agent name must start with a letter or number.',
+    };
+  }
+
+  const cleanUri = String(input.endpointUri || '').trim();
+  if (!cleanUri) {
+    return {
+      ok: false,
+      code: 'invalid_endpoint_uri',
+      reason: 'Local URI is required (e.g. http://127.0.0.1:4200 or stdio://gemini-cli).',
+    };
+  }
+
+  try {
+    const parsed = new URL(cleanUri);
+    if (!ALLOWED_AGENT_PROTOCOLS.has(parsed.protocol)) {
+      return {
+        ok: false,
+        code: 'invalid_endpoint_uri',
+        reason: 'Local URI must use http://, https://, ws://, wss://, or stdio://.',
+      };
+    }
+    if (parsed.protocol !== 'stdio:' && !parsed.hostname) {
+      return {
+        ok: false,
+        code: 'invalid_endpoint_uri',
+        reason: 'Local URI must include a valid host (e.g. 127.0.0.1 or localhost).',
+      };
+    }
+  } catch {
+    return {
+      ok: false,
+      code: 'invalid_endpoint_uri',
+      reason: 'Enter a valid URI such as http://127.0.0.1:4200/agent or stdio://claude-code.',
+    };
+  }
+
+  return { ok: true, cleanName, cleanUri };
+}
+
+export function registerLocalAgent(
+  state: BoardState,
+  input: LocalAgentRegistrationInput,
+  now = Date.now()
+): MutationResult<Actor> {
+  const check = validateLocalAgentInput(input);
+  if (!check.ok) {
+    return {
+      ok: false,
+      error: { code: check.code, reason: check.reason },
+    };
+  }
+
+  const existingPerson = state.actors.find(
+    (a) => a.name.toLowerCase() === check.cleanName && a.kind === 'person'
+  );
+  if (existingPerson) {
+    return {
+      ok: false,
+      error: {
+        code: 'actor_conflict',
+        reason: `"${check.cleanName}" is already registered as a human member.`,
+      },
+    };
+  }
+
+  const statusMessage =
+    input.statusMessage?.trim() ||
+    `Local ${input.cliFlavor} endpoint attached at ${check.cleanUri}.`;
+
+  const { actor, event } = ensureActor(
+    state,
+    {
+      name: check.cleanName,
+      via: input.via?.trim() || state.currentUser,
+      kind: 'agent',
+      status: 'listening',
+      statusMessage,
+      cliFlavor: input.cliFlavor,
+      endpointUri: check.cleanUri,
+    },
+    now
+  );
+
+  return { ok: true, data: actor, event };
+}
+
+export function removeLocalAgent(
+  state: BoardState,
+  name: string,
+  now = Date.now()
+): MutationResult<{ removed: string }> {
+  const cleanName = String(name || '').trim().toLowerCase();
+  const idx = state.actors.findIndex(
+    (a) => a.kind === 'agent' && a.name.toLowerCase() === cleanName
+  );
+  if (idx === -1) {
+    return {
+      ok: false,
+      error: { code: 'agent_not_found', reason: `Agent "${name}" not found.` },
+    };
+  }
+  const [removed] = state.actors.splice(idx, 1);
+  const event = appendEvent(
+    state,
+    'actor.updated',
+    removed.name,
+    `Removed local agent endpoint ${removed.name}`,
+    { removed: removed.name },
+    undefined,
+    undefined,
+    now
+  );
+  return { ok: true, data: { removed: removed.name }, event };
 }
 
 export function createChannel(

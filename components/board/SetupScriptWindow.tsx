@@ -129,17 +129,17 @@ export function SetupScriptWindow({
             Local Vercel Board CLI &amp; Interactive TUI (<code>local-vercel-board</code> / <code>lvb</code>)
           </p>
           <p className="text-[11px] opacity-85">
-            Open-source Apache-2.0 CLI by{' '}
+            MIT open-source CLI aligned with <strong>vercel/board SPEC.md</strong> &amp;{' '}
+            <code className="font-code">@poppinss/cliui</code> · by{' '}
             <a
               href="https://iolivares.com"
               target="_blank"
               rel="noreferrer"
-              className="underline font-bold text-[#000080]"
+              className="underline text-[#000080]"
             >
-              Iván Olivares (iolivares.com)
-            </a>{' '}
-            · aligned with <strong>vercel/board SPEC.md</strong> &amp;{' '}
-            <code className="font-code">@poppinss/cliui</code>.
+              Iván Olivares
+            </a>
+            .
           </p>
         </div>
 

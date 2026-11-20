@@ -6,6 +6,9 @@ export type AgentCliFlavor =
   | 'claude-code'
   | 'grok'
   | 'gemini-antigravity'
+  | 'gemini-cli'
+  | 'codex'
+  | 'ollama'
   | 'fixer'
   | 'scout'
   | 'deployer'
@@ -21,6 +24,7 @@ export interface Actor {
   status: ActorStatus;
   statusMessage: string;
   cliFlavor?: AgentCliFlavor;
+  endpointUri?: string; // e.g. http://127.0.0.1:4200/agent or stdio://claude-code
   avatarKey: string;
   activeTaskId?: string | null;
   lastSeenAt: number;

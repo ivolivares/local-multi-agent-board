@@ -386,7 +386,7 @@ export function MediaPlayerWindow({
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="border border-[#4ade80] bg-[#052e16]/50 p-2.5 space-y-1">
                     <div className="text-[11px] font-bold text-[#86efac]">
-                      Local Mode (lvb CLI &amp; TUI · Apache-2.0)
+                      Local Mode (lvb CLI &amp; TUI · MIT)
                     </div>
                     <p className="font-code text-[10px] text-[#dcfce7]">
                       npx local-vercel-board serve --attach

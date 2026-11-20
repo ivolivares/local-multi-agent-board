@@ -15,7 +15,7 @@ Slack, GitHub, and Linear threads.
 0. LOCAL MODE — OPEN-SOURCE \`local-vercel-board\` (\`lvb\`) CLI & TUI
 ================================================================================
 Run everything locally with ZERO Vercel account required using the standalone
-Apache-2.0 npm package \`local-vercel-board\` (powered by @poppinss/cliui):
+MIT npm package \`local-vercel-board\` (powered by @poppinss/cliui):
 
   # Start SPEC.md-aligned local server (127.0.0.1:4100/api/board) + Interactive TUI
   npx local-vercel-board serve --port 4100 --dir .board --attach
@@ -138,15 +138,12 @@ Before your first write on a real Vercel Board, install the official skill:
     Act only on \`message.posted\` events from the user's handle without \`/<name>\`.
 
 ================================================================================
-AUTHOR, LICENSE & ATTRIBUTION (APACHE-2.0)
+CREDITS & LICENSE (MIT)
 ================================================================================
-Created & licensed under the Apache License, Version 2.0 (open source) by:
-  Iván Olivares — https://iolivares.com
-
-Protocol & Library Attributions:
-  - Based on Vercel Board (https://github.com/vercel/board, SPEC.md, Apache-2.0)
-  - Terminal UI built with @poppinss/cliui (https://github.com/poppinss/cliui, MIT)
-  - Independent open-source local implementation; not affiliated with Vercel Inc.
+MIT License — Iván Olivares (https://iolivares.com)
+- Implements Vercel Board v1 SPEC.md (https://github.com/vercel/board)
+- Terminal UI built with @poppinss/cliui (MIT)
+- Independent open-source local implementation; not affiliated with Vercel Inc.
 `;
 
 interface ReadmeWindowProps {

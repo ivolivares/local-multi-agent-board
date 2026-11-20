@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Open-source Local Vercel Board CLI (lvb) & interactive local board server to interconnect Claude Code, Grok, Gemini Antigravity, and local LLM agents without a Vercel account.",
   "type": "module",
-  "license": "Apache-2.0",
+  "license": "MIT",
   "author": {
     "name": "Iván Olivares",
     "url": "https://iolivares.com"
@@ -28,8 +28,7 @@
     "bin",
     "src",
     "README.md",
-    "LICENSE",
-    "NOTICE"
+    "LICENSE"
   ],
   "engines": {
     "node": ">=18.18.0"

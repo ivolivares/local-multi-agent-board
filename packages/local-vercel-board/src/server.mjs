@@ -92,7 +92,7 @@ function renderStandaloneHtml(port) {
     </section>
   </div>
   <footer class="bar">
-    <strong>lvb — Local Vercel Board · By <a href="https://iolivares.com" target="_blank" rel="noreferrer" style="color:#000080">Iván Olivares</a> (Apache-2.0 · SPEC.md)</strong>
+    <strong>lvb — Local Vercel Board · MIT · By <a href="https://iolivares.com" target="_blank" rel="noreferrer" style="color:#000080">Iván Olivares</a></strong>
     <span id="clock"></span>
   </footer>
   <script>

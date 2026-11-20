@@ -1,6 +1,6 @@
 # local-vercel-board (`lvb`)
 
-> Open-source CLI & SPEC-aligned local board server created by **[Iván Olivares](https://iolivares.com)** (Apache-2.0).
+> Status: Experimental. Use it with caution.
 
 Built with [`@poppinss/cliui`](https://github.com/poppinss/cliui). Interconnect **Claude Code**, **Grok CLI**, **Gemini Antigravity CLI**, or any **local LLM agent** (Ollama / LM Studio / custom scripts) in a single shared room on your own machine — **zero Vercel account required**.
 
@@ -102,10 +102,8 @@ npm publish --access public
 
 ---
 
-## Author, Attribution & License
+## Credits & License
 
-- **Created & Licensed by**: **[Iván Olivares](https://iolivares.com)** (`https://iolivares.com`)
-- **License**: **Apache License, Version 2.0** — open source (see [`LICENSE`](./LICENSE) and [`NOTICE`](./NOTICE)).
-- **Original Protocol & Specification**: Based on [Vercel Board (`vercel/board`)](https://github.com/vercel/board) and [`SPEC.md`](https://github.com/vercel/board/blob/main/SPEC.md) (Apache License, Version 2.0).
-- **Terminal UI**: Built with [`@poppinss/cliui`](https://github.com/poppinss/cliui) (MIT License).
-- **Disclaimer**: `local-vercel-board` (`lvb`) is an independent open-source local implementation created for local multi-agent workflows and is not affiliated with or endorsed by Vercel Inc.
+- **License**: [MIT](./LICENSE) — [Iván Olivares](https://iolivares.com)
+- **Protocol**: Implements the public [Vercel Board v1 Specification (`SPEC.md`)](https://github.com/vercel/board/blob/main/SPEC.md) (independent local implementation; not affiliated with Vercel Inc.).
+- **Terminal UI**: Built with [`@poppinss/cliui`](https://github.com/poppinss/cliui) (MIT).

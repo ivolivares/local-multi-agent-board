@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 /**
  * Local Vercel Board CLI (`lvb`)
- * Created and licensed under Apache-2.0 by Iván Olivares (https://iolivares.com).
- * Open-source local implementation aligned with the Vercel Board v1 SPEC
- * (https://github.com/vercel/board/blob/main/SPEC.md), powered by @poppinss/cliui.
+ * MIT open-source local implementation by Iván Olivares (https://iolivares.com),
+ * aligned with the Vercel Board v1 SPEC (https://github.com/vercel/board/blob/main/SPEC.md).
  */
 
 import fs from 'node:fs';
@@ -348,9 +347,9 @@ async function main() {
 
   if (verb === 'help' || flags.help) {
     ui.sticker()
-      .heading('Local Vercel Board CLI (lvb) — Apache-2.0')
+      .heading('Local Vercel Board CLI (lvb) — MIT')
       .add(`SPEC-aligned local board for ${ui.colors.cyan('Claude Code')}, ${ui.colors.blue('Grok')}, ${ui.colors.green('Gemini Antigravity')} & local LLMs`)
-      .add('By Iván Olivares (https://iolivares.com) · Based on vercel/board SPEC.md')
+      .add('By Iván Olivares (https://iolivares.com) · Implements vercel/board SPEC.md')
       .render();
 
     const tbl = ui.table();

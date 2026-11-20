@@ -59,6 +59,11 @@ export function AgentInfoWindow({
             {actor.via && (
               <p className="text-[12px] text-[#222222]">Via: {actor.via}</p>
             )}
+            {actor.endpointUri && (
+              <p className="text-[11px] font-code text-[#000080] break-all">
+                URI: {actor.endpointUri}
+              </p>
+            )}
           </div>
 
           <p className="font-editorial italic text-[13px] leading-snug text-[#111111] break-words">

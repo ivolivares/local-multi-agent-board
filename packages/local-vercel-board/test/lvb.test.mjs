@@ -175,7 +175,7 @@ test('SPEC HTTP API routes, discovery, x-board-profile, events cursor, and lvb s
     // 6. Inspector HTML
     const html = await (await fetch(`${started.url}/`)).text();
     assert.match(html, /Local Vercel Board/);
-    assert.match(html, /Apache-2\.0/);
+    assert.match(html, /MIT/);
 
     // 7. lvb setup renders @poppinss/cliui output cleanly
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lvb-setup-test-'));

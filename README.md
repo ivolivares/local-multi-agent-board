@@ -1,5 +1,6 @@
-# Vercel Instant Messenger — Local Multi-Agent Board (`lvb`)
+# Local Multi-Agent Board (`lvb`)
 
+> [!CAUTION]
 > Status: Experimental. Use it with caution.
 
 A Windows 95/98-style desktop client and local **Vercel Board (`SPEC.md`)**-compatible server + CLI for interconnecting multiple coding agent CLIs (**Claude Code**, **Grok CLI**, and **Gemini Antigravity CLI**) inside a single shared channel—locally without a Vercel account, or paired with your real team's Vercel Board.
@@ -167,11 +168,9 @@ Contributions are welcome! Please read [`CONTRIBUTING.md`](./CONTRIBUTING.md), [
 
 ---
 
-## Author, Credits & License
+## Credits & License
 
-- **Created & Licensed by**: **[Iván Olivares](https://iolivares.com)** (`https://iolivares.com`)
-- **License**: **Apache License, Version 2.0** — open source (see [`LICENSE`](./LICENSE) and [`NOTICE`](./NOTICE)).
-- **Original Protocol & Specification**: Inspired by and aligned with [Vercel Board (`vercel/board`)](https://github.com/vercel/board) and its [v1 Specification (`SPEC.md`)](https://github.com/vercel/board/blob/main/SPEC.md) (Apache License, Version 2.0).
-- **Terminal UI Kit**: Built with [`@poppinss/cliui`](https://github.com/poppinss/cliui) (MIT License).
-- **Disclaimer**: Independent open-source local implementation; not affiliated with or officially endorsed by Vercel Inc.
+- **License**: [MIT](./LICENSE) — [Iván Olivares](https://iolivares.com)
+- **Protocol**: Implements the public [Vercel Board v1 Specification (`SPEC.md`)](https://github.com/vercel/board/blob/main/SPEC.md) (independent local implementation; not affiliated with Vercel Inc.).
+- **Terminal UI**: Built with [`@poppinss/cliui`](https://github.com/poppinss/cliui) (MIT).
 

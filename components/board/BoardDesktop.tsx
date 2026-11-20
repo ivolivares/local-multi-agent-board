@@ -4,14 +4,17 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   BookOpen,
+  Check,
   FileCode2,
   FileText,
   Film,
   Folder,
+  Grid2x2,
   LayoutGrid,
   Layers,
   Minimize2,
   Play,
+  PlusCircle,
   RotateCcw,
   SlidersHorizontal,
   Terminal,
@@ -27,16 +30,28 @@ import type {
   TaskActionType,
 } from '@/lib/board-types';
 import {
+  autoAlignDesktopIcons,
+  DEFAULT_DESKTOP_ICON_ORDER,
+  DESKTOP_GRID_SIZE,
+  resolveDesktopIconCollisions,
+  snapDesktopIcon,
+  type DesktopIconId,
+  type DesktopIconLayout,
+  type DesktopIconPosition,
+} from '@/lib/desktop-grid';
+import {
   DEFAULT_THEME_ID,
   isDesktopThemeId,
   type DesktopThemeId,
 } from '@/lib/desktop-themes';
 import { playMessagePing } from '@/lib/sound';
+import { AddAgentWindow, type AddAgentPayload } from './AddAgentWindow';
 import { AgentInfoWindow } from './AgentInfoWindow';
 import { BoardDialogs, type ActiveDialog } from './BoardDialogs';
 import { BuddyListWindow, type BuddyTab } from './BuddyListWindow';
 import { CliTerminalWindow } from './CliTerminalWindow';
 import { CommandPromptWindow } from './CommandPromptWindow';
+import { DesktopIconGrid } from './DesktopIconGrid';
 import { ExplainLikeIm5Window } from './ExplainLikeIm5Window';
 import { MediaPlayerWindow } from './MediaPlayerWindow';
 import { MentionAlertWindow } from './MentionAlertWindow';
@@ -58,7 +73,8 @@ type WinId =
   | 'media'
   | 'cmd'
   | 'settings'
-  | 'eli5';
+  | 'eli5'
+  | 'addAgent';
 
 interface WinState {
   open: boolean;
@@ -161,6 +177,13 @@ function buildInitialWindows(viewportWidth: number): Record<WinId, WinState> {
       rect: { x: Math.max(46, Math.floor((w - 650) / 2)), y: 46, width: 650, height: 590 },
       z: 20,
     },
+    addAgent: {
+      open: false,
+      minimized: false,
+      maximized: false,
+      rect: { x: Math.max(48, Math.floor((w - 580) / 2)), y: 54, width: 580, height: 560 },
+      z: 21,
+    },
   };
 }
 
@@ -196,6 +219,19 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
   const [windows, setWindows] = useState<Record<WinId, WinState>>(() =>
     buildInitialWindows(1440)
   );
+  const [viewport, setViewport] = useState<{ width: number; height: number }>({
+    width: 1440,
+    height: 900,
+  });
+  const [snapToGrid, setSnapToGrid] = useState<boolean>(true);
+  const [iconLayout, setIconLayout] = useState<DesktopIconLayout>(() =>
+    autoAlignDesktopIcons(DEFAULT_DESKTOP_ICON_ORDER, 1440, 900, 'right')
+  );
+  const [desktopContextMenu, setDesktopContextMenu] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const hasManualIconLayoutRef = useRef<boolean>(false);
 
   const zCounterRef = useRef<number>(24);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
@@ -255,14 +291,17 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
     }
   }, [state.messages]);
 
-  // Responsive viewport detection & initial window fit
+  // Responsive viewport detection, initial window fit & 64x64 desktop icon grid sync
   useEffect(() => {
-    const syncViewport = () => {
-      const mobile = window.innerWidth < 860;
+    const syncViewport = (autoAlignOnInit = false) => {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      setViewport({ width: vw, height: vh });
+      const mobile = vw < 860;
       setIsMobile(mobile);
       if (!mobile) {
         setWindows((prev) => {
-          const fresh = buildInitialWindows(window.innerWidth);
+          const fresh = buildInitialWindows(vw);
           return {
             buddy: { ...prev.buddy, rect: fresh.buddy.rect },
             agentInfo: { ...prev.agentInfo, rect: fresh.agentInfo.rect },
@@ -275,13 +314,28 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
             cmd: { ...prev.cmd, rect: fresh.cmd.rect },
             settings: { ...prev.settings, rect: fresh.settings.rect },
             eli5: { ...prev.eli5, rect: fresh.eli5.rect },
+            addAgent: { ...prev.addAgent, rect: fresh.addAgent.rect },
           };
         });
+        if (autoAlignOnInit || !hasManualIconLayoutRef.current) {
+          setIconLayout(
+            autoAlignDesktopIcons(DEFAULT_DESKTOP_ICON_ORDER, vw, vh, 'right')
+          );
+        } else {
+          setIconLayout((prev) =>
+            resolveDesktopIconCollisions(prev, DEFAULT_DESKTOP_ICON_ORDER, vw, vh)
+          );
+        }
       }
     };
-    syncViewport();
-    window.addEventListener('resize', syncViewport);
-    return () => window.removeEventListener('resize', syncViewport);
+
+    const initTimer = setTimeout(() => syncViewport(true), 0);
+    const onResize = () => syncViewport(false);
+    window.addEventListener('resize', onResize);
+    return () => {
+      clearTimeout(initTimer);
+      window.removeEventListener('resize', onResize);
+    };
   }, []);
 
   // Real-time Server-Sent Events connection with auto-reconnect
@@ -423,10 +477,44 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
     setActiveWin('chat');
   }, []);
 
+  const handleAutoAlignIcons = useCallback(() => {
+    setGoMenuOpen(false);
+    setDesktopContextMenu(null);
+    hasManualIconLayoutRef.current = false;
+    const vw = typeof window !== 'undefined' ? window.innerWidth : viewport.width;
+    const vh = typeof window !== 'undefined' ? window.innerHeight : viewport.height;
+    setIconLayout(autoAlignDesktopIcons(DEFAULT_DESKTOP_ICON_ORDER, vw, vh, 'right'));
+  }, [viewport.height, viewport.width]);
+
+  const handleMoveDesktopIcon = useCallback(
+    (id: DesktopIconId, rawPos: DesktopIconPosition) => {
+      hasManualIconLayoutRef.current = true;
+      const vw = typeof window !== 'undefined' ? window.innerWidth : viewport.width;
+      const vh = typeof window !== 'undefined' ? window.innerHeight : viewport.height;
+      setIconLayout((prev) => {
+        if (snapToGrid) {
+          const snapped = snapDesktopIcon(id, rawPos, prev, vw, vh, DESKTOP_GRID_SIZE);
+          return { ...prev, [id]: snapped };
+        }
+        // Even with free placement toggled off, clamp safely within the desktop work area
+        const clamped = {
+          x: Math.max(0, Math.min(vw - DESKTOP_GRID_SIZE, Math.round(rawPos.x))),
+          y: Math.max(0, Math.min(vh - 36 - DESKTOP_GRID_SIZE, Math.round(rawPos.y))),
+        };
+        return { ...prev, [id]: clamped };
+      });
+    },
+    [snapToGrid, viewport.height, viewport.width]
+  );
+
   const restoreDefaultLayout = useCallback(() => {
     setGoMenuOpen(false);
+    setDesktopContextMenu(null);
+    hasManualIconLayoutRef.current = false;
     const width = typeof window !== 'undefined' ? window.innerWidth : 1440;
+    const height = typeof window !== 'undefined' ? window.innerHeight : 900;
     setWindows(buildInitialWindows(width));
+    setIconLayout(autoAlignDesktopIcons(DEFAULT_DESKTOP_ICON_ORDER, width, height, 'right'));
     setActiveWin('chat');
   }, []);
 
@@ -797,6 +885,42 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
     setTimeout(() => composerRef.current?.focus(), 40);
   };
 
+  const handleRegisterLocalAgent = async (
+    payload: AddAgentPayload
+  ): Promise<{ ok: boolean; error?: string }> => {
+    try {
+      const res = await fetch('/api/board/actors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...payload,
+          channelId: activeThread?.channelId || 'agent-bridge',
+        }),
+      });
+      const json = (await res.json()) as {
+        ok?: boolean;
+        error?: { reason?: string };
+      };
+      if (!res.ok || !json.ok) {
+        return {
+          ok: false,
+          error: json.error?.reason || 'Failed to register local agent.',
+        };
+      }
+      await refreshState();
+      return { ok: true };
+    } catch {
+      return { ok: false, error: 'Network error while registering local agent.' };
+    }
+  };
+
+  const handleRemoveLocalAgent = async (name: string) => {
+    await fetch(`/api/board/actors?name=${encodeURIComponent(name)}`, {
+      method: 'DELETE',
+    });
+    await refreshState();
+  };
+
   const handleResetDemo = async () => {
     setGoMenuOpen(false);
     await fetch('/api/board/reset', { method: 'POST' });
@@ -939,6 +1063,20 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
           },
         ]
       : []),
+    ...(windows.addAgent.open
+      ? [
+          {
+            id: 'addAgent',
+            label: 'Add Agent',
+            mobileLabel: 'Agent',
+            active: isMobile
+              ? mobileWin === 'addAgent'
+              : activeWin === 'addAgent' &&
+                windows.addAgent.open &&
+                !windows.addAgent.minimized,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -948,119 +1086,36 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       onClick={() => {
         if (goMenuOpen) setGoMenuOpen(false);
         if (cliStatusOpen) setCliStatusOpen(false);
+        if (desktopContextMenu) setDesktopContextMenu(null);
+      }}
+      onContextMenu={(e) => {
+        if (isMobile) return;
+        const target = e.target as HTMLElement;
+        if (
+          target.closest('.win98-window') ||
+          target.closest('[aria-label="Desktop Taskbar"]')
+        ) {
+          return;
+        }
+        e.preventDefault();
+        setGoMenuOpen(false);
+        setCliStatusOpen(false);
+        const menuW = 224;
+        const menuH = 152;
+        const x = Math.min(e.clientX, window.innerWidth - menuW - 8);
+        const y = Math.min(e.clientY, window.innerHeight - 36 - menuH - 8);
+        setDesktopContextMenu({ x: Math.max(4, x), y: Math.max(4, y) });
       }}
     >
-      {/* Desktop Icons Column (Far Right, matching reference video) */}
+      {/* 64x64 Snapping & Auto-Align Win98 Desktop Icon Grid */}
       {!isMobile && (
-        <nav
-          aria-label="Desktop shortcuts"
-          className="fixed right-3 top-2.5 z-[5] flex w-[104px] flex-col items-center gap-2"
-        >
-          <button
-            type="button"
-            onClick={() => focusWindow('eli5')}
-            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
-          >
-            <BookOpen
-              size={28}
-              strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
-            />
-            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight text-center group-hover:bg-[#000080]">
-              Explain Like I&apos;m 5
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => focusWindow('cmd')}
-            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
-          >
-            <Terminal
-              size={28}
-              strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
-            />
-            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight text-center group-hover:bg-[#000080]">
-              Command Prompt
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => focusWindow('terminal')}
-            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
-          >
-            <TerminalSquare
-              size={28}
-              strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
-            />
-            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
-              vb tail
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => focusWindow('setup')}
-            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
-          >
-            <FileCode2
-              size={28}
-              strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
-            />
-            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
-              lvb setup
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => focusWindow('readme')}
-            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
-          >
-            <FileText
-              size={28}
-              strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
-            />
-            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
-              readme.md
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => focusWindow('media')}
-            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
-          >
-            <Film
-              size={28}
-              strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
-            />
-            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
-              Intro.mp4
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => focusWindow('settings')}
-            className="group flex flex-col items-center gap-0.5 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
-          >
-            <SlidersHorizontal
-              size={28}
-              strokeWidth={1.6}
-              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.55)] group-hover:scale-105 transition-transform"
-            />
-            <span className="win98-desktop-label px-1 text-[10.5px] leading-tight group-hover:bg-[#000080]">
-              Settings
-            </span>
-          </button>
-        </nav>
+        <DesktopIconGrid
+          layout={iconLayout}
+          viewport={viewport}
+          snapEnabled={snapToGrid}
+          onOpenIcon={(id) => focusWindow(id)}
+          onMoveIcon={handleMoveDesktopIcon}
+        />
       )}
 
       {/* Window 1: Vercel Instant Messenger (Buddy List / Channels / Tasks) */}
@@ -1401,6 +1456,112 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         </Win98Window>
       )}
 
+      {/* Window 12: Add Agent — Register Local Agent Endpoints */}
+      {shouldRenderWindow('addAgent') && (
+        <Win98Window
+          id="addAgent"
+          title="Add Agent — Local Endpoint Registry"
+          active={activeWin === 'addAgent'}
+          zIndex={windows.addAgent.z}
+          rect={windows.addAgent.rect}
+          maximized={windows.addAgent.maximized}
+          isMobile={isMobile}
+          showMaximize
+          onFocus={focusWindow}
+          onMove={moveWindow}
+          onMinimize={minimizeWindow}
+          onToggleMaximize={toggleMaximize}
+          onClose={closeWindow}
+        >
+          <AddAgentWindow
+            actors={state.actors}
+            currentUser={state.currentUser}
+            activeChannel={activeThread?.channelId || 'agent-bridge'}
+            onRegisterAgent={handleRegisterLocalAgent}
+            onRemoveAgent={handleRemoveLocalAgent}
+            onInspectAgent={(actorName) => {
+              setSelectedActorName(actorName);
+              focusWindow('agentInfo');
+            }}
+            onClose={() => closeWindow('addAgent')}
+          />
+        </Win98Window>
+      )}
+
+      {/* Desktop Right-Click Win98 Context Menu */}
+      {desktopContextMenu && !isMobile && (
+        <div
+          role="menu"
+          aria-label="Desktop context menu"
+          style={{ left: desktopContextMenu.x, top: desktopContextMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+          className="win98-window win98-surface fixed z-[160] w-[224px] py-1 text-[12px]"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={handleAutoAlignIcons}
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+          >
+            <Grid2x2 size={13} />
+            <span>Auto-Align Icons (64×64)</span>
+          </button>
+          <button
+            type="button"
+            role="menuitemcheckbox"
+            aria-checked={snapToGrid}
+            onClick={() => {
+              setSnapToGrid((prev) => {
+                const next = !prev;
+                if (next) {
+                  setIconLayout((curr) =>
+                    resolveDesktopIconCollisions(
+                      curr,
+                      DEFAULT_DESKTOP_ICON_ORDER,
+                      viewport.width,
+                      viewport.height
+                    )
+                  );
+                }
+                return next;
+              });
+              setDesktopContextMenu(null);
+            }}
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+          >
+            <span className="w-[13px] inline-flex justify-center">
+              {snapToGrid ? <Check size={12} /> : null}
+            </span>
+            <span>Snap Icons to 64×64 Grid</span>
+          </button>
+          <div className="my-1 border-t border-[#808080] border-b border-b-white" />
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setDesktopContextMenu(null);
+              focusWindow('addAgent');
+            }}
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+          >
+            <PlusCircle size={13} />
+            <span>Add Local Agent...</span>
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setDesktopContextMenu(null);
+              focusWindow('settings');
+            }}
+            className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+          >
+            <SlidersHorizontal size={13} />
+            <span>Properties (Color Schemes)...</span>
+          </button>
+        </div>
+      )}
+
       {/* Modal Dialogs */}
       {activeThread && (
         <BoardDialogs
@@ -1447,7 +1608,18 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
             >
               <Terminal size={14} />
-              <span>Command Prompt (ping / status)</span>
+              <span>Command Prompt (lvb CLI &amp; TUI)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGoMenuOpen(false);
+                focusWindow('addAgent');
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <PlusCircle size={14} />
+              <span>Add Agent (Register Local URI)</span>
             </button>
             <button
               type="button"
@@ -1543,6 +1715,14 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
             >
               <Layers size={14} />
               <span>Cascade Windows</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleAutoAlignIcons}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <Grid2x2 size={14} />
+              <span>Auto-Align Icons (64×64 Grid)</span>
             </button>
             <button
               type="button"

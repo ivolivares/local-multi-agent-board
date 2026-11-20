@@ -35,7 +35,7 @@ const INITIAL_BANNER: TerminalEntry[] = [
         tone: 'info',
       },
       {
-        text: 'By Iván Olivares (iolivares.com) · Open-source Apache-2.0 · SPEC.md aligned `lvb` runner',
+        text: 'MIT open-source · SPEC.md aligned `lvb` CLI runner · by Iván Olivares (iolivares.com)',
         tone: 'dim',
       },
       {

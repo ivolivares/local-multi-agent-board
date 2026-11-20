@@ -11,8 +11,11 @@ import {
   parseCliCommand,
   performTaskAction,
   postMessage,
+  registerLocalAgent,
+  removeLocalAgent,
   toggleReaction,
   updateThreadLabels,
+  validateLocalAgentInput,
 } from './board-logic';
 
 test('extractMentions parses unique lowercase handles without duplicates', () => {
@@ -168,3 +171,40 @@ test('generateSetupScript outputs runnable bash script with Claude Code, Grok, a
   assert.ok(script.includes('antigravity'));
   assert.ok(script.includes('http://localhost:3000'));
 });
+
+test('registerLocalAgent validates name and URI, persists endpointUri, and supports removal', () => {
+  const state = createInitialBoardState(1_700_000_000_000);
+
+  // Rejects empty name or invalid protocol
+  assert.equal(validateLocalAgentInput({ name: '', endpointUri: 'http://127.0.0.1:4200' }).ok, false);
+  assert.equal(validateLocalAgentInput({ name: 'gemini-cli', endpointUri: 'ftp://bad-proto' }).ok, false);
+  assert.equal(validateLocalAgentInput({ name: 'gemini-cli', endpointUri: 'not-a-uri' }).ok, false);
+
+  // Registers valid local endpoint
+  const res = registerLocalAgent(state, {
+    name: 'gemini-cli',
+    cliFlavor: 'gemini-cli',
+    endpointUri: 'http://127.0.0.1:4200/gemini',
+    via: 'ctate',
+  });
+  assert.equal(res.ok, true);
+  assert.equal(res.data?.name, 'gemini-cli');
+  assert.equal(res.data?.cliFlavor, 'gemini-cli');
+  assert.equal(res.data?.endpointUri, 'http://127.0.0.1:4200/gemini');
+  assert.ok(state.actors.some((a) => a.name === 'gemini-cli' && a.endpointUri === 'http://127.0.0.1:4200/gemini'));
+
+  // Rejects collision with existing human member
+  const conflict = registerLocalAgent(state, {
+    name: 'ctate',
+    cliFlavor: 'custom',
+    endpointUri: 'stdio://ctate',
+  });
+  assert.equal(conflict.ok, false);
+  assert.equal(conflict.error?.code, 'actor_conflict');
+
+  // Supports removal
+  const removed = removeLocalAgent(state, 'gemini-cli');
+  assert.equal(removed.ok, true);
+  assert.equal(state.actors.some((a) => a.name === 'gemini-cli'), false);
+});
+
