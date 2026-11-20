@@ -14,7 +14,7 @@
       "status": "online",
       "statusMessage": "Coordinating local multi-agent CLI swarm.",
       "avatarKey": "ctate",
-      "lastSeenAt": 1795141303169
+      "lastSeenAt": 1795142758631
     },
     {
       "id": "person:lahfir",
@@ -23,7 +23,7 @@
       "status": "online",
       "statusMessage": "Monitoring local CI traces.",
       "avatarKey": "lahfir",
-      "lastSeenAt": 1795141183169
+      "lastSeenAt": 1795142638631
     },
     {
       "id": "person:railly",
@@ -32,7 +32,7 @@
       "status": "online",
       "statusMessage": "Reviewing PR #214 and flaky cursor tests.",
       "avatarKey": "railly",
-      "lastSeenAt": 1795141123169
+      "lastSeenAt": 1795142578631
     },
     {
       "id": "agent:claude-code",
@@ -44,7 +44,7 @@
       "cliFlavor": "claude-code",
       "avatarKey": "claude-code",
       "activeTaskId": "842",
-      "lastSeenAt": 1795141303169
+      "lastSeenAt": 1795142758631
     },
     {
       "id": "agent:grok",
@@ -56,7 +56,7 @@
       "cliFlavor": "grok",
       "avatarKey": "grok",
       "activeTaskId": null,
-      "lastSeenAt": 1795141243169
+      "lastSeenAt": 1795142698631
     },
     {
       "id": "agent:antigravity",
@@ -68,7 +68,7 @@
       "cliFlavor": "gemini-antigravity",
       "avatarKey": "antigravity",
       "activeTaskId": null,
-      "lastSeenAt": 1795141243169
+      "lastSeenAt": 1795142698631
     },
     {
       "id": "agent:fixer",
@@ -80,7 +80,7 @@
       "cliFlavor": "fixer",
       "avatarKey": "fixer",
       "activeTaskId": "833",
-      "lastSeenAt": 1795141183169
+      "lastSeenAt": 1795142638631
     },
     {
       "id": "agent:scout",
@@ -92,7 +92,7 @@
       "cliFlavor": "scout",
       "avatarKey": "scout",
       "activeTaskId": null,
-      "lastSeenAt": 1795141063169
+      "lastSeenAt": 1795142518631
     },
     {
       "id": "agent:reviewer",
@@ -104,7 +104,7 @@
       "cliFlavor": "reviewer",
       "avatarKey": "reviewer",
       "activeTaskId": null,
-      "lastSeenAt": 1795141123169
+      "lastSeenAt": 1795142578631
     }
   ],
   "channels": [
@@ -112,19 +112,19 @@
       "id": "screen-relay",
       "name": "screen-relay",
       "description": "CI screen relay triage and live agent handoffs.",
-      "createdAt": 1795136743169
+      "createdAt": 1795138198631
     },
     {
       "id": "agent-bridge",
       "name": "agent-bridge",
       "description": "Single local channel interconnecting Claude Code, Grok, and Gemini Antigravity CLIs.",
-      "createdAt": 1795138543169
+      "createdAt": 1795139998631
     },
     {
       "id": "work/checkout",
       "name": "work/checkout",
       "description": "Parallel swarm queue for checkout retries and edge-case tests.",
-      "createdAt": 1795139143169
+      "createdAt": 1795140598631
     }
   ],
   "threads": [
@@ -136,8 +136,8 @@
         "status=fixing"
       ],
       "createdBy": "railly",
-      "createdAt": 1795140343169,
-      "updatedAt": 1795141063169
+      "createdAt": 1795141798631,
+      "updatedAt": 1795142518631
     },
     {
       "id": "840",
@@ -148,8 +148,8 @@
         "status=active"
       ],
       "createdBy": "ctate",
-      "createdAt": 1795140523169,
-      "updatedAt": 1795141183169
+      "createdAt": 1795141978631,
+      "updatedAt": 1795142638631
     },
     {
       "id": "845",
@@ -159,8 +159,8 @@
         "queue=open"
       ],
       "createdBy": "ctate",
-      "createdAt": 1795140703169,
-      "updatedAt": 1795140943169
+      "createdAt": 1795142158631,
+      "updatedAt": 1795142398631
     }
   ],
   "messages": [
@@ -174,7 +174,7 @@
       "mentions": [],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140343169
+      "createdAt": 1795141798631
     },
     {
       "id": "msg_102",
@@ -195,7 +195,7 @@
         }
       ],
       "reactions": [],
-      "createdAt": 1795140583169
+      "createdAt": 1795142038631
     },
     {
       "id": "msg_103",
@@ -210,7 +210,7 @@
       ],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140603169
+      "createdAt": 1795142058631
     },
     {
       "id": "msg_104",
@@ -223,7 +223,7 @@
       "mentions": [],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140643169
+      "createdAt": 1795142098631
     },
     {
       "id": "msg_105",
@@ -236,7 +236,7 @@
       "mentions": [],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140763169
+      "createdAt": 1795142218631
     },
     {
       "id": "msg_106",
@@ -256,7 +256,7 @@
           ]
         }
       ],
-      "createdAt": 1795140883169
+      "createdAt": 1795142338631
     },
     {
       "id": "msg_107",
@@ -269,7 +269,7 @@
       "mentions": [],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795141003169
+      "createdAt": 1795142458631
     },
     {
       "id": "msg_201",
@@ -285,7 +285,7 @@
       ],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140523169
+      "createdAt": 1795141978631
     },
     {
       "id": "msg_202",
@@ -298,7 +298,7 @@
       "mentions": [],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140643169
+      "createdAt": 1795142098631
     },
     {
       "id": "msg_203",
@@ -313,7 +313,7 @@
       ],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140703169
+      "createdAt": 1795142158631
     },
     {
       "id": "msg_204",
@@ -329,7 +329,7 @@
       ],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140823169
+      "createdAt": 1795142278631
     },
     {
       "id": "msg_205",
@@ -342,7 +342,7 @@
       "mentions": [],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140883169
+      "createdAt": 1795142338631
     },
     {
       "id": "msg_301",
@@ -354,7 +354,7 @@
       "mentions": [],
       "attachments": [],
       "reactions": [],
-      "createdAt": 1795140703169
+      "createdAt": 1795142158631
     }
   ],
   "tasks": [
@@ -368,10 +368,10 @@
       "claimedBy": "fixer",
       "claimedVia": "ctate",
       "leaseMinutes": 15,
-      "leaseExpiresAt": 1795142023169,
+      "leaseExpiresAt": 1795143478631,
       "resultNote": null,
-      "createdAt": 1795140583169,
-      "updatedAt": 1795140643169
+      "createdAt": 1795142038631,
+      "updatedAt": 1795142098631
     },
     {
       "id": "842",
@@ -383,10 +383,10 @@
       "claimedBy": "claude-code",
       "claimedVia": "ctate",
       "leaseMinutes": 15,
-      "leaseExpiresAt": 1795142083169,
+      "leaseExpiresAt": 1795143538631,
       "resultNote": null,
-      "createdAt": 1795140823169,
-      "updatedAt": 1795140883169
+      "createdAt": 1795142278631,
+      "updatedAt": 1795142338631
     },
     {
       "id": "843",
@@ -400,8 +400,8 @@
       "leaseMinutes": 5,
       "leaseExpiresAt": null,
       "resultNote": null,
-      "createdAt": 1795140943169,
-      "updatedAt": 1795140943169
+      "createdAt": 1795142398631,
+      "updatedAt": 1795142398631
     },
     {
       "id": "846",
@@ -415,8 +415,8 @@
       "leaseMinutes": 5,
       "leaseExpiresAt": null,
       "resultNote": null,
-      "createdAt": 1795140763169,
-      "updatedAt": 1795140763169
+      "createdAt": 1795142218631,
+      "updatedAt": 1795142218631
     }
   ],
   "mentions": [
@@ -429,7 +429,7 @@
       "threadId": "831",
       "messageId": "msg_106",
       "snippet": "@ctate #214 approved, merge when ready",
-      "createdAt": 1795140883169,
+      "createdAt": 1795142338631,
       "dismissed": false
     }
   ],
@@ -445,7 +445,7 @@
       "payload": {
         "messageId": "msg_106"
       },
-      "createdAt": 1795140883169
+      "createdAt": 1795142338631
     },
     {
       "id": "evt_2",
@@ -458,7 +458,7 @@
       "payload": {
         "messageId": "msg_204"
       },
-      "createdAt": 1795140943169
+      "createdAt": 1795142398631
     },
     {
       "id": "evt_3",
@@ -471,7 +471,7 @@
       "payload": {
         "messageId": "msg_107"
       },
-      "createdAt": 1795141003169
+      "createdAt": 1795142458631
     }
   ]
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   FileCode2,
+  FileText,
   Film,
   Folder,
   LayoutGrid,
@@ -20,16 +21,28 @@ import type {
   MessageFormatting,
   TaskActionType,
 } from '@/lib/board-types';
+import { playMessagePing } from '@/lib/sound';
 import { AgentInfoWindow } from './AgentInfoWindow';
 import { BoardDialogs, type ActiveDialog } from './BoardDialogs';
 import { BuddyListWindow, type BuddyTab } from './BuddyListWindow';
 import { CliTerminalWindow } from './CliTerminalWindow';
+import { MediaPlayerWindow } from './MediaPlayerWindow';
 import { MentionAlertWindow } from './MentionAlertWindow';
+import { ReadmeWindow } from './ReadmeWindow';
 import { SetupScriptWindow } from './SetupScriptWindow';
+import { Taskbar, type TaskbarButtonItem } from './Taskbar';
 import { ThreadChatWindow } from './ThreadChatWindow';
 import { Win98Window, type WindowRect } from './Win98Window';
 
-type WinId = 'buddy' | 'agentInfo' | 'mention' | 'chat' | 'terminal' | 'setup';
+type WinId =
+  | 'buddy'
+  | 'agentInfo'
+  | 'mention'
+  | 'chat'
+  | 'terminal'
+  | 'setup'
+  | 'readme'
+  | 'media';
 
 interface WinState {
   open: boolean;
@@ -97,6 +110,20 @@ function buildInitialWindows(viewportWidth: number): Record<WinId, WinState> {
       rect: { x: Math.max(40, Math.floor((w - 680) / 2)), y: 42, width: 680, height: 640 },
       z: 15,
     },
+    readme: {
+      open: false,
+      minimized: false,
+      maximized: false,
+      rect: { x: Math.max(44, Math.floor((w - 660) / 2)), y: 54, width: 660, height: 590 },
+      z: 16,
+    },
+    media: {
+      open: false,
+      minimized: false,
+      maximized: false,
+      rect: { x: Math.max(48, Math.floor((w - 620) / 2)), y: 68, width: 620, height: 470 },
+      z: 17,
+    },
   };
 }
 
@@ -120,11 +147,11 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
   const [isMobile, setIsMobile] = useState<boolean>(false);
   const [goMenuOpen, setGoMenuOpen] = useState<boolean>(false);
   const [cliStatusOpen, setCliStatusOpen] = useState<boolean>(false);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [streamStatus, setStreamStatus] = useState<
     'connecting' | 'connected' | 'reconnecting'
   >('connecting');
   const [dialog, setDialog] = useState<ActiveDialog>(null);
-  const [clockText, setClockText] = useState<string>('');
   const [dismissedMentionIds, setDismissedMentionIds] = useState<string[]>([]);
   const [windows, setWindows] = useState<Record<WinId, WinState>>(() =>
     buildInitialWindows(1440)
@@ -132,6 +159,28 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
 
   const zCounterRef = useRef<number>(20);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
+  const seenMessageIdsRef = useRef<Set<string>>(
+    new Set(initialState.messages.map((m) => m.id))
+  );
+  const soundEnabledRef = useRef<boolean>(soundEnabled);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
+
+  // Play subtle Web Audio API ping whenever a brand-new chat message arrives
+  useEffect(() => {
+    let hasNewMessage = false;
+    for (const msg of state.messages) {
+      if (!seenMessageIdsRef.current.has(msg.id)) {
+        seenMessageIdsRef.current.add(msg.id);
+        hasNewMessage = true;
+      }
+    }
+    if (hasNewMessage && soundEnabledRef.current) {
+      playMessagePing();
+    }
+  }, [state.messages]);
 
   // Responsive viewport detection & initial window fit
   useEffect(() => {
@@ -148,6 +197,8 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
             mention: { ...prev.mention, rect: fresh.mention.rect },
             terminal: { ...prev.terminal, rect: fresh.terminal.rect },
             setup: { ...prev.setup, rect: fresh.setup.rect },
+            readme: { ...prev.readme, rect: fresh.readme.rect },
+            media: { ...prev.media, rect: fresh.media.rect },
           };
         });
       }
@@ -155,21 +206,6 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
     syncViewport();
     window.addEventListener('resize', syncViewport);
     return () => window.removeEventListener('resize', syncViewport);
-  }, []);
-
-  // Live taskbar clock
-  useEffect(() => {
-    const updateClock = () => {
-      const d = new Date();
-      let h = d.getHours();
-      const m = String(d.getMinutes()).padStart(2, '0');
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12 || 12;
-      setClockText(`${h}:${m} ${ampm}`);
-    };
-    updateClock();
-    const id = setInterval(updateClock, 15_000);
-    return () => clearInterval(id);
   }, []);
 
   // Real-time Server-Sent Events connection with auto-reconnect
@@ -577,40 +613,95 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
     return windows[id].open && !windows[id].minimized;
   };
 
-  const taskbarButtons: { id: WinId; label: string; mobileLabel: string }[] = [
-    { id: 'buddy', label: 'Vercel Instant Mess...', mobileLabel: 'Board' },
+  const taskbarButtons: TaskbarButtonItem[] = [
+    {
+      id: 'buddy',
+      label: 'Vercel Instant Mess...',
+      mobileLabel: 'Board',
+      active: isMobile
+        ? mobileWin === 'buddy'
+        : activeWin === 'buddy' && windows.buddy.open && !windows.buddy.minimized,
+    },
     {
       id: 'chat',
       label: activeThread
         ? `#${activeThread.channelId} : ${activeThread.id}`
         : '#agent-bridge',
       mobileLabel: 'Chat',
+      active: isMobile
+        ? mobileWin === 'chat'
+        : activeWin === 'chat' && windows.chat.open && !windows.chat.minimized,
     },
     ...(activeMention && windows.mention.open && !isMobile
       ? [
           {
-            id: 'mention' as const,
+            id: 'mention',
             label: `${activeMention.fromActor} - mention`,
             mobileLabel: 'Alert',
+            active:
+              activeWin === 'mention' &&
+              windows.mention.open &&
+              !windows.mention.minimized,
           },
         ]
       : []),
     ...(windows.terminal.open || isMobile
-      ? [{ id: 'terminal' as const, label: 'vb tail', mobileLabel: 'CLI' }]
+      ? [
+          {
+            id: 'terminal',
+            label: 'vb tail',
+            mobileLabel: 'CLI',
+            active: isMobile
+              ? mobileWin === 'terminal'
+              : activeWin === 'terminal' &&
+                windows.terminal.open &&
+                !windows.terminal.minimized,
+          },
+        ]
       : []),
     ...(windows.setup.open || isMobile
-      ? [{ id: 'setup' as const, label: 'setup-board.sh', mobileLabel: 'Setup' }]
+      ? [
+          {
+            id: 'setup',
+            label: 'setup-board.sh',
+            mobileLabel: 'Setup',
+            active: isMobile
+              ? mobileWin === 'setup'
+              : activeWin === 'setup' &&
+                windows.setup.open &&
+                !windows.setup.minimized,
+          },
+        ]
+      : []),
+    ...(windows.readme.open
+      ? [
+          {
+            id: 'readme',
+            label: 'readme.md - Notepad',
+            mobileLabel: 'Docs',
+            active: isMobile
+              ? mobileWin === 'readme'
+              : activeWin === 'readme' &&
+                windows.readme.open &&
+                !windows.readme.minimized,
+          },
+        ]
+      : []),
+    ...(windows.media.open
+      ? [
+          {
+            id: 'media',
+            label: 'Intro.mp4',
+            mobileLabel: 'Intro',
+            active: isMobile
+              ? mobileWin === 'media'
+              : activeWin === 'media' &&
+                windows.media.open &&
+                !windows.media.minimized,
+          },
+        ]
       : []),
   ];
-
-  const flakeAttachment: Attachment = {
-    id: 'att_flake_mp4',
-    name: 'flake.mp4',
-    sizeLabel: '2 MB',
-    contentType: 'video/mp4',
-    previewText:
-      'Captured by scout via lahfir in #screen-relay (thread 831):\nFrame 00:01.42 — Windows runner clicked cursor target 18ms before WM_ACTIVATE focus.\nPatch: screen-relay#214 (approved by reviewer, 40/40 green).',
-  };
 
   return (
     <main
@@ -624,7 +715,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       {!isMobile && (
         <nav
           aria-label="Desktop shortcuts"
-          className="fixed right-3 top-4 z-[5] flex w-[96px] flex-col items-center gap-5"
+          className="fixed right-3 top-4 z-[5] flex w-[96px] flex-col items-center gap-4"
         >
           <button
             type="button"
@@ -673,9 +764,22 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
 
           <button
             type="button"
-            onClick={() =>
-              setDialog({ type: 'preview-attachment', attachment: flakeAttachment })
-            }
+            onClick={() => focusWindow('readme')}
+            className="group flex flex-col items-center gap-1 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
+          >
+            <FileText
+              size={34}
+              strokeWidth={1.6}
+              className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
+            />
+            <span className="px-1 text-[11px] leading-tight text-white group-hover:bg-[#000080]">
+              readme.md
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => focusWindow('media')}
             className="group flex flex-col items-center gap-1 p-1 text-white focus-visible:outline-1 focus-visible:outline-white"
           >
             <Film
@@ -684,7 +788,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               className="text-white drop-shadow-[1px_1px_0px_rgba(0,0,0,0.45)] group-hover:scale-105 transition-transform"
             />
             <span className="px-1 text-[11px] leading-tight text-white group-hover:bg-[#000080]">
-              flake.mp4
+              Intro.mp4
             </span>
           </button>
         </nav>
@@ -891,6 +995,54 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         </Win98Window>
       )}
 
+      {/* Window 7: readme.md — Windows 95 Notepad Vercel Board Guide */}
+      {shouldRenderWindow('readme') && (
+        <Win98Window
+          id="readme"
+          title="readme.md - Notepad"
+          active={activeWin === 'readme'}
+          zIndex={windows.readme.z}
+          rect={windows.readme.rect}
+          maximized={windows.readme.maximized}
+          isMobile={isMobile}
+          showMaximize
+          onFocus={focusWindow}
+          onMove={moveWindow}
+          onMinimize={minimizeWindow}
+          onToggleMaximize={toggleMaximize}
+          onClose={closeWindow}
+        >
+          <ReadmeWindow
+            onOpenSetup={() => focusWindow('setup')}
+            onOpenIntroVideo={() => focusWindow('media')}
+          />
+        </Win98Window>
+      )}
+
+      {/* Window 8: Intro.mp4 — Windows 95 Media Player Animated Explainer */}
+      {shouldRenderWindow('media') && (
+        <Win98Window
+          id="media"
+          title="Intro.mp4 - Windows Media Player"
+          active={activeWin === 'media'}
+          zIndex={windows.media.z}
+          rect={windows.media.rect}
+          maximized={windows.media.maximized}
+          isMobile={isMobile}
+          showMaximize
+          onFocus={focusWindow}
+          onMove={moveWindow}
+          onMinimize={minimizeWindow}
+          onToggleMaximize={toggleMaximize}
+          onClose={closeWindow}
+        >
+          <MediaPlayerWindow
+            onOpenReadme={() => focusWindow('readme')}
+            onOpenSetup={() => focusWindow('setup')}
+          />
+        </Win98Window>
+      )}
+
       {/* Modal Dialogs */}
       {activeThread && (
         <BoardDialogs
@@ -905,11 +1057,11 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         />
       )}
 
-      {/* Go Start Menu Popup */}
+      {/* Start Menu Popup */}
       {goMenuOpen && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="win98-window fixed bottom-[36px] left-1 z-[150] w-[236px] flex overflow-hidden"
+          className="win98-window fixed bottom-[36px] left-1 z-[150] w-[248px] flex overflow-hidden"
         >
           <div className="w-7 bg-[#000080] flex items-end justify-center pb-2 shrink-0">
             <span className="[writing-mode:vertical-rl] rotate-180 font-editorial font-bold italic text-[13px] tracking-wider text-white">
@@ -917,6 +1069,28 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
             </span>
           </div>
           <div className="flex-1 py-1 text-[12px] bg-[#c0c0c0]">
+            <button
+              type="button"
+              onClick={() => {
+                setGoMenuOpen(false);
+                focusWindow('media');
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <Film size={14} />
+              <span>Play Intro.mp4 (Win95 Player)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setGoMenuOpen(false);
+                focusWindow('readme');
+              }}
+              className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
+            >
+              <FileText size={14} />
+              <span>Read readme.md (Vercel Board)</span>
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -1100,102 +1274,32 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         </div>
       )}
 
-      {/* Classic Windows 98 Bottom Taskbar */}
-      <footer className="fixed bottom-0 left-0 right-0 z-[100] flex h-[34px] items-center justify-between gap-1.5 bg-[#c0c0c0] border-t-2 border-t-[#ffffff] px-1.5">
-        <div className="flex items-center gap-1 min-w-0 flex-1 overflow-x-auto">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setCliStatusOpen(false);
-              setGoMenuOpen((v) => !v);
-            }}
-            aria-expanded={goMenuOpen}
-            className={`inline-flex items-center gap-1.5 px-2.5 h-[26px] text-[12px] font-bold text-[#000000] whitespace-nowrap shrink-0 ${
-              goMenuOpen ? 'win98-button-pressed' : 'win98-button'
-            }`}
-          >
-            <Triangle size={11} fill="currentColor" strokeWidth={0} />
-            <span>Go</span>
-          </button>
-
-          <span className="h-5 w-[2px] border-l border-[#808080] border-r border-r-white shrink-0 mx-0.5" />
-
-          {taskbarButtons.map((btn) => {
-            const isCurrent = isMobile
-              ? mobileWin === btn.id
-              : activeWin === btn.id &&
-                windows[btn.id].open &&
-                !windows[btn.id].minimized;
-
-            return (
-              <button
-                key={btn.id}
-                type="button"
-                onClick={() => handleTaskbarClick(btn.id)}
-                className={`inline-flex items-center gap-1.5 px-2.5 h-[26px] max-w-[190px] text-[12px] text-[#000000] whitespace-nowrap shrink-0 ${
-                  isCurrent
-                    ? 'win98-taskbar-active font-bold'
-                    : 'win98-button font-normal'
-                }`}
-              >
-                <span
-                  className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center bg-black text-white"
-                  aria-hidden="true"
-                >
-                  <Triangle size={7} fill="currentColor" strokeWidth={0} />
-                </span>
-                <span className="truncate">
-                  {isMobile ? btn.mobileLabel : btn.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* System Tray: Live Connected CLI Agents Status Indicator + Clock */}
-        <div className="win98-sunken-gray hidden sm:inline-flex items-center gap-2 px-2 h-[26px] text-[12px] text-[#000000] tabular-nums whitespace-nowrap shrink-0">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setGoMenuOpen(false);
-              setCliStatusOpen((v) => !v);
-            }}
-            aria-expanded={cliStatusOpen}
-            aria-label={`CLI agents status: ${streamStatus === 'connected' ? 'connected' : streamStatus}, ${connectedAgents.length} agents`}
-            className="inline-flex items-center gap-1.5 px-1 py-0.5 text-[11px] hover:bg-[#d6d6d6] focus-visible:outline-1 focus-visible:outline-black"
-          >
-            <span
-              className={`h-2 w-2 rounded-full shrink-0 ${
-                streamStatus === 'connected'
-                  ? 'bg-[#15803d]'
-                  : streamStatus === 'reconnecting'
-                    ? 'bg-[#b45309]'
-                    : 'bg-[#64748b]'
-              }`}
-              aria-hidden="true"
-            />
-            <span className="font-medium">
-              {streamStatus === 'connected'
-                ? `${connectedAgents.length} CLI Live`
-                : streamStatus === 'reconnecting'
-                  ? 'Reconnecting'
-                  : 'Connecting'}
-            </span>
-          </button>
-          <span className="h-3.5 w-[1px] bg-[#808080]" aria-hidden="true" />
-          <span className="inline-flex items-center gap-1.5">
-            <span
-              className="inline-flex h-3.5 w-3.5 items-center justify-center bg-black text-white"
-              aria-hidden="true"
-            >
-              <Triangle size={7} fill="currentColor" strokeWidth={0} />
-            </span>
-            <span suppressHydrationWarning>{clockText || '2:14 PM'}</span>
-          </span>
-        </div>
-      </footer>
+      {/* Dedicated Windows 95/98 Taskbar Component */}
+      <Taskbar
+        buttons={taskbarButtons}
+        isMobile={isMobile}
+        startMenuOpen={goMenuOpen}
+        cliStatusOpen={cliStatusOpen}
+        streamStatus={streamStatus}
+        connectedAgentsCount={connectedAgents.length}
+        soundEnabled={soundEnabled}
+        onToggleStartMenu={() => {
+          setCliStatusOpen(false);
+          setGoMenuOpen((v) => !v);
+        }}
+        onTaskbarButtonClick={(id) => handleTaskbarClick(id as WinId)}
+        onToggleCliStatus={() => {
+          setGoMenuOpen(false);
+          setCliStatusOpen((v) => !v);
+        }}
+        onToggleSound={() => {
+          setSoundEnabled((prev) => {
+            const next = !prev;
+            if (next) playMessagePing();
+            return next;
+          });
+        }}
+      />
     </main>
   );
 }

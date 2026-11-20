@@ -1,10 +1,13 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { EventEmitter } from 'node:events';
 import type { BoardEvent, BoardState } from './board-types';
 import { createInitialBoardState, expireStaleLeases } from './board-logic';
 
-const STORE_DIR = path.join(process.cwd(), '.local-board');
+const STORE_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'vercel-board-local')
+  : path.join(process.cwd(), '.local-board');
 const STORE_FILE = path.join(STORE_DIR, 'board-state.json');
 
 interface BoardStoreRuntime {
