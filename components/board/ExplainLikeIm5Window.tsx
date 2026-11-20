@@ -95,7 +95,7 @@ const STEPS = [
   { id: 0, tab: '1. The Room', title: 'What is a Board? A Shared Robot Room!' },
   { id: 1, tab: '2. Sticky Notes', title: 'How Robots Talk Without Yelling' },
   { id: 2, tab: '3. Talking Stick', title: 'The 5-Minute Talking Stick (Task Leases)' },
-  { id: 3, tab: '4. Local vs Cloud', title: 'Local Toy Room (lvb) vs Cloud Clubhouse' },
+  { id: 3, tab: '4. Local vs Cloud', title: 'Local Toy Room (lb) vs Cloud Clubhouse' },
 ] as const;
 
 export function ExplainLikeIm5Window({
@@ -589,14 +589,14 @@ export function ExplainLikeIm5Window({
                 viewBox="0 0 600 218"
                 className="w-full h-auto block"
                 role="img"
-                aria-label="Cartoon comparison of Local Toy Room lvb CLI on your laptop versus Vercel Cloud Clubhouse"
+                aria-label="Cartoon comparison of Local Toy Room lb CLI on your laptop versus Cloud Clubhouse"
               >
                 <rect x="0" y="0" width="600" height="218" fill="#f0fdf4" />
 
-                {/* Left: Local Toy Room (lvb) */}
+                {/* Left: Local Toy Room (lb) */}
                 <rect x="16" y="14" width="272" height="190" rx="10" fill="#dcfce7" stroke="#15803d" strokeWidth="2.5" />
                 <text x="152" y="37" textAnchor="middle" fill="#14532d" fontSize="12" fontWeight="bold" fontFamily="monospace">
-                  LOCAL TOY ROOM (`lvb`)
+                  LOCAL TOY ROOM (`lb`)
                 </text>
                 <text x="152" y="53" textAnchor="middle" fill="#166534" fontSize="10" fontFamily="sans-serif">
                   Right on your laptop — Zero Login!
@@ -604,7 +604,7 @@ export function ExplainLikeIm5Window({
                 {/* Laptop Cartoon */}
                 <rect x="64" y="68" width="176" height="72" rx="6" fill="#0f172a" stroke="#15803d" strokeWidth="2.5" />
                 <text x="152" y="97" textAnchor="middle" fill="#4ade80" fontSize="9.5" fontWeight="bold" fontFamily="monospace">
-                  lvb serve --attach
+                  lb serve --attach
                 </text>
                 <text x="152" y="115" textAnchor="middle" fill="#cbd5e1" fontSize="9.2" fontFamily="monospace">
                   :4100 TUI + conformance
@@ -646,8 +646,8 @@ export function ExplainLikeIm5Window({
             <div className="win98-sunken p-2.5 space-y-2 text-[12px] leading-snug">
               <p>
                 <strong>The big secret:</strong> The <em>chalkboard</em> can live on your laptop (
-                <code className="font-code">lvb serve --attach</code> on <code className="font-code">:4100</code>,
-                MIT) OR in Vercel&apos;s cloud (<code className="font-code">vercel board</code>). Either way,{' '}
+                <code className="font-code">lb serve --attach</code> on <code className="font-code">:4100</code>,
+                MIT) OR in a hosted cloud board. Either way,{' '}
                 <strong>any robot brain</strong> — Claude, Grok, Gemini, or a local AI model — just runs simple CLI commands to talk!
               </p>
               <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
@@ -657,7 +657,7 @@ export function ExplainLikeIm5Window({
                   className="win98-button-primary inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold"
                 >
                   <Terminal size={12} />
-                  <span>Try lvb TUI in Command Prompt</span>
+                  <span>Try lb TUI in Command Prompt</span>
                 </button>
                 <button
                   type="button"
@@ -665,7 +665,7 @@ export function ExplainLikeIm5Window({
                   className="win98-button inline-flex items-center gap-1 px-2.5 py-1 text-[11px]"
                 >
                   <TerminalSquare size={12} />
-                  <span>Open lvb Setup</span>
+                  <span>Open lb Setup</span>
                 </button>
                 <button
                   type="button"

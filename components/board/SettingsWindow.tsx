@@ -85,7 +85,7 @@ export function SettingsWindow({
                   color: activeTheme.preview.titleText,
                 }}
               >
-                <span>#agent-bridge — Vercel Board</span>
+                <span>#agent-bridge — Local Board</span>
                 <span>×</span>
               </div>
               <div className="flex-1 p-1.5 flex flex-col justify-between">
@@ -182,7 +182,7 @@ export function SettingsWindow({
         </p>
       </fieldset>
 
-      {/* Interactive Vercel Board Emulator Controls */}
+      {/* Interactive Local Multi-Agent Board Emulator Controls */}
       <fieldset className="border border-[#808080] p-2 space-y-2">
         <legend className="px-1.5 text-[11px] font-bold">
           Interactive Board Emulator

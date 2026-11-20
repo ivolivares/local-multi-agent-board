@@ -29,7 +29,7 @@ export const DESKTOP_SHORTCUTS: DesktopShortcutDef[] = [
   { id: 'cmd', label: 'Command Prompt' },
   { id: 'addAgent', label: 'Add Agent' },
   { id: 'terminal', label: 'vb tail' },
-  { id: 'setup', label: 'lvb setup' },
+  { id: 'setup', label: 'lb setup' },
   { id: 'readme', label: 'readme.md' },
   { id: 'media', label: 'Intro.mp4' },
   { id: 'settings', label: 'Settings' },

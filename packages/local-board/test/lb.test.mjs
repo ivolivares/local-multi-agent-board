@@ -12,7 +12,7 @@ import {
 import { startBoardServer } from '../src/server.mjs';
 import { runSetup } from '../src/setup.mjs';
 
-test('RFC 8941 x-board-profile header and duration parsers follow SPEC.md', () => {
+test('RFC 8941 x-board-profile header and duration parsers follow Board v1 Specification', () => {
   assert.deepEqual(parseBoardProfileHeader('claude-code'), {
     name: 'claude-code',
     avatar: null,
@@ -114,7 +114,7 @@ test('SPEC task engine supports needs (waiting->ready), epoch+token claims, clai
   assert.equal(reopened.task.state, 'ready');
 });
 
-test('SPEC HTTP API routes, discovery, x-board-profile, events cursor, and lvb setup work end-to-end', async () => {
+test('Specification HTTP API routes, discovery, x-board-profile, events cursor, and lb setup work end-to-end', async () => {
   const started = await startBoardServer({ port: 0, persist: false });
   try {
     // 1. Discovery
@@ -174,11 +174,11 @@ test('SPEC HTTP API routes, discovery, x-board-profile, events cursor, and lvb s
 
     // 6. Inspector HTML
     const html = await (await fetch(`${started.url}/`)).text();
-    assert.match(html, /Local Vercel Board/);
+    assert.match(html, /Local Multi-Agent Board/);
     assert.match(html, /MIT/);
 
-    // 7. lvb setup renders @poppinss/cliui output cleanly
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lvb-setup-test-'));
+    // 7. lb setup renders @poppinss/cliui output cleanly
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lb-setup-test-'));
     const ui = cliui({ mode: 'raw' });
     const setupRes = await runSetup({
       ui,

@@ -118,7 +118,7 @@ export function BuddyListWindow({
 
   return (
     <div className="flex flex-1 flex-col min-h-0 bg-[#c0c0c0]">
-      {/* Iconic black Vercel Instant Messenger 4.0 header */}
+      {/* Iconic retro black Local Board header */}
       <div className="mx-1 mt-1 mb-1.5 bg-[#000000] px-3 py-2.5 text-white relative">
         <span className="absolute right-2.5 top-1.5 text-[10px] text-[#9a9a9a] font-ui">
           {state.boardName}
@@ -132,11 +132,11 @@ export function BuddyListWindow({
             <span className="absolute -bottom-1.5 left-1.5 h-2.5 w-2.5 bg-white rotate-45" />
           </div>
           <div className="min-w-0">
-            <div className="font-editorial text-[26px] font-bold italic leading-none tracking-tight text-white">
-              Vercel
+            <div className="font-editorial text-[24px] font-bold italic leading-none tracking-tight text-white">
+              Local Board
             </div>
             <div className="mt-1 text-[11px] text-[#d4d4d4] leading-none">
-              Instant Messenger 4.0
+              Multi-Agent Messenger 4.0
             </div>
           </div>
         </div>

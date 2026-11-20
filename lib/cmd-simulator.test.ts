@@ -28,8 +28,16 @@ test('status, theme, demo swarm, and vb forwarding parse deterministically', () 
 
   const statusRes = executePromptCommand('status', state, 'agent-bridge');
   assert.equal(statusRes.kind, 'output');
-  assert.ok(statusRes.lines.some((l) => l.text.includes('VERCEL BOARD LOCAL DAEMON STATUS')));
+  assert.ok(statusRes.lines.some((l) => l.text.includes('LOCAL MULTI-AGENT BOARD DAEMON STATUS')));
   assert.ok(statusRes.lines.some((l) => l.text.includes('claude-code')));
+
+  const lbStatusRes = executePromptCommand('lb status', state, 'agent-bridge');
+  assert.equal(lbStatusRes.kind, 'forward_lb_cli');
+  assert.equal(lbStatusRes.command, 'lb status');
+
+  const lbAttachRes = executePromptCommand('lb attach --as grok', state, 'agent-bridge');
+  assert.equal(lbAttachRes.kind, 'enter_lb_attach');
+  assert.equal(lbAttachRes.asActor, 'grok');
 
   const themeRes = executePromptCommand('theme desert', state, 'agent-bridge');
   assert.equal(themeRes.kind, 'set_theme');

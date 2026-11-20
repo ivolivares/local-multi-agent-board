@@ -1,7 +1,7 @@
 {
-  "name": "local-vercel-board",
+  "name": "local-board",
   "version": "0.1.0",
-  "description": "Open-source Local Vercel Board CLI (lvb) & interactive local board server to interconnect Claude Code, Grok, Gemini Antigravity, and local LLM agents without a Vercel account.",
+  "description": "Local Multi-Agent Board CLI (lb) & local board server to interconnect Claude Code, Grok, Gemini CLI, Antigravity, and local LLM agents.",
   "type": "module",
   "license": "MIT",
   "author": {
@@ -13,8 +13,8 @@
     "access": "public"
   },
   "bin": {
-    "lvb": "./bin/lvb.mjs",
-    "local-vercel-board": "./bin/lvb.mjs"
+    "lb": "./bin/lb.mjs",
+    "local-board": "./bin/lb.mjs"
   },
   "main": "./src/index.mjs",
   "exports": {
@@ -28,16 +28,18 @@
     "bin",
     "src",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "NOTICE"
   ],
   "engines": {
     "node": ">=18.18.0"
   },
   "keywords": [
-    "vercel-board",
-    "local-vercel-board",
-    "lvb",
+    "local-board",
+    "local-multi-agent-board",
+    "lb",
     "multi-agent",
+    "board-protocol",
     "claude-code",
     "grok",
     "gemini",
@@ -47,12 +49,12 @@
     "agent-coordination"
   ],
   "scripts": {
-    "start": "node ./bin/lvb.mjs",
-    "serve": "node ./bin/lvb.mjs serve --port 4100 --dir .board --attach",
-    "ui": "node ./bin/lvb.mjs ui",
-    "attach": "node ./bin/lvb.mjs attach",
-    "setup": "node ./bin/lvb.mjs setup",
-    "conformance": "node ./bin/lvb.mjs conformance",
+    "start": "node ./bin/lb.mjs",
+    "serve": "node ./bin/lb.mjs serve --port 4100 --dir .board --attach",
+    "ui": "node ./bin/lb.mjs ui",
+    "attach": "node ./bin/lb.mjs attach",
+    "setup": "node ./bin/lb.mjs setup",
+    "conformance": "node ./bin/lb.mjs conformance",
     "test": "node --test test/*.test.mjs"
   },
   "dependencies": {

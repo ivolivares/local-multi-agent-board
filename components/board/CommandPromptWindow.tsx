@@ -8,7 +8,7 @@ import {
   type PromptOutputLine,
 } from '@/lib/cmd-simulator';
 import type { DesktopThemeId } from '@/lib/desktop-themes';
-import type { AnsiSpan } from '@/lib/lvb-runner';
+import type { AnsiSpan } from '@/lib/lb-runner';
 
 interface CommandPromptWindowProps {
   state: BoardState;
@@ -31,15 +31,15 @@ const INITIAL_BANNER: TerminalEntry[] = [
     id: 'banner',
     lines: [
       {
-        text: 'Local Vercel Board (`lvb`) Command Prompt & Interactive @poppinss/cliui TUI',
+        text: 'Local Multi-Agent Board (`lb`) Command Prompt & Interactive @poppinss/cliui TUI',
         tone: 'info',
       },
       {
-        text: 'MIT open-source · SPEC.md aligned `lvb` CLI runner · by Iván Olivares (iolivares.com)',
+        text: 'MIT open-source · Board v1 Specification `lb` CLI runner · by Iván Olivares (iolivares.com)',
         tone: 'dim',
       },
       {
-        text: 'Try: lvb attach (TUI) | lvb status | lvb conformance | lvb help | ping all | demo swarm',
+        text: 'Try: lb attach (TUI) | lb status | lb conformance | lb help | ping all | demo swarm',
         tone: 'ok',
       },
     ],
@@ -92,7 +92,7 @@ export function CommandPromptWindow({
   const [historyIdx, setHistoryIdx] = useState<number>(-1);
   const [running, setRunning] = useState<boolean>(false);
 
-  // Interactive `lvb attach` TUI session state
+  // Interactive `lb attach` TUI session state
   const [tuiAttached, setTuiAttached] = useState<boolean>(false);
   const [tuiChannel, setTuiChannel] = useState<string>(activeChannel || 'agent-bridge');
   const [tuiActor, setTuiActor] = useState<string>(state.currentUser || 'ctate');
@@ -104,17 +104,17 @@ export function CommandPromptWindow({
     outputEndRef.current?.scrollIntoView({ block: 'end' });
   }, [entries.length]);
 
-  const callRealLvb = async (
-    lvbCommand: string,
+  const callRealLb = async (
+    lbCommand: string,
     displayCommand?: string,
     promptPrefix?: string
   ) => {
     setRunning(true);
     try {
-      const res = await fetch('/api/board/lvb', {
+      const res = await fetch('/api/board/lb', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: lvbCommand }),
+        body: JSON.stringify({ command: lbCommand }),
       });
       const json = (await res.json()) as {
         ok?: boolean;
@@ -124,8 +124,8 @@ export function CommandPromptWindow({
       setEntries((prev) => [
         ...prev,
         {
-          id: `lvb-${Date.now()}-${Math.random()}`,
-          promptPrefix: promptPrefix ?? 'C:\\VERCEL-BOARD>',
+          id: `lb-${Date.now()}-${Math.random()}`,
+          promptPrefix: promptPrefix ?? 'C:\\LOCAL-BOARD>',
           command: displayCommand,
           ansiLines: json.lines || [[{ text: json.raw || 'Command completed.' }]],
         },
@@ -135,12 +135,12 @@ export function CommandPromptWindow({
       setEntries((prev) => [
         ...prev,
         {
-          id: `lvb-err-${Date.now()}`,
-          promptPrefix: promptPrefix ?? 'C:\\VERCEL-BOARD>',
+          id: `lb-err-${Date.now()}`,
+          promptPrefix: promptPrefix ?? 'C:\\LOCAL-BOARD>',
           command: displayCommand,
           lines: [
             {
-              text: err instanceof Error ? err.message : 'Failed to execute lvb command.',
+              text: err instanceof Error ? err.message : 'Failed to execute lb command.',
               tone: 'error',
             },
           ],
@@ -159,7 +159,7 @@ export function CommandPromptWindow({
     setTuiActor(actor);
     setTuiAttached(true);
 
-    await callRealLvb(`lvb status --channel ${ch}`, `lvb attach --channel ${ch} --as ${actor}`);
+    await callRealLb(`lb status --channel ${ch}`, `lb attach --channel ${ch} --as ${actor}`);
 
     const boxWidth = 74;
     const padBox = (txt: string) =>
@@ -175,7 +175,7 @@ export function CommandPromptWindow({
             tone: 'info',
           },
           {
-            text: padBox('Attached Interactive CLI (`lvb attach` TUI — @poppinss/cliui)'),
+            text: padBox('Attached Interactive CLI (`lb attach` TUI — @poppinss/cliui)'),
             tone: 'info',
           },
           {
@@ -204,7 +204,7 @@ export function CommandPromptWindow({
     const line = raw.trim();
     if (!line || running) return;
 
-    const currentPrompt = `lvb (#${tuiChannel} as ${tuiActor})>`;
+    const currentPrompt = `lb (#${tuiChannel} as ${tuiActor})>`;
     setHistory((prev) => [line, ...prev.slice(0, 29)]);
     setHistoryIdx(-1);
     setInput('');
@@ -217,7 +217,7 @@ export function CommandPromptWindow({
           id: `tui-quit-${Date.now()}`,
           promptPrefix: currentPrompt,
           command: line,
-          lines: [{ text: '[ info ] Detached from Local Vercel Board TUI.', tone: 'info' }],
+          lines: [{ text: '[ info ] Detached from Local Multi-Agent Board TUI.', tone: 'info' }],
         },
       ]);
       return;
@@ -231,18 +231,18 @@ export function CommandPromptWindow({
           promptPrefix: currentPrompt,
           command: line,
           lines: [
-            { text: 'lvb attach TUI Commands:', tone: 'info' },
+            { text: 'lb attach TUI Commands:', tone: 'info' },
             { text: '  /status             Live @poppinss/cliui sticker + agent table', tone: 'default' },
-            { text: '  /ping [agent]       Ping connected CLI agents via real `lvb ping`', tone: 'default' },
+            { text: '  /ping [agent]       Ping connected CLI agents via real `lb ping`', tone: 'default' },
             { text: '  /channels           List board channels & counts', tone: 'default' },
             { text: '  /tasks              List 5-minute leased task queue', tone: 'default' },
             { text: '  /read [limit]       Read recent messages in active channel', tone: 'default' },
-            { text: '  /conformance        Run 7-check Vercel Board SPEC.md conformance suite', tone: 'ok' },
+            { text: '  /conformance        Run 7-check Board v1 Specification conformance suite', tone: 'ok' },
             { text: '  /claim              Claim next ready task as active persona', tone: 'default' },
             { text: '  /as <agent>         Switch active persona (e.g. /as grok)', tone: 'warn' },
             { text: '  /channel <name>     Switch active channel', tone: 'warn' },
-            { text: '  /setup              Run real `lvb setup` wizard output', tone: 'default' },
-            { text: '  /quit               Detach back to C:\\VERCEL-BOARD>', tone: 'dim' },
+            { text: '  /setup              Run real `lb setup` wizard output', tone: 'default' },
+            { text: '  /quit               Detach back to C:\\LOCAL-BOARD>', tone: 'dim' },
             { text: '  <any plain text>    Post directly to #' + tuiChannel + ' as ' + tuiActor, tone: 'ok' },
           ],
         },
@@ -281,39 +281,39 @@ export function CommandPromptWindow({
     }
 
     if (line === '/status') {
-      await callRealLvb(`lvb status --channel ${tuiChannel}`, line, currentPrompt);
+      await callRealLb(`lb status --channel ${tuiChannel}`, line, currentPrompt);
       return;
     }
 
     if (line.startsWith('/ping')) {
       const target = line.slice(5).trim();
-      await callRealLvb(target ? `lvb ping ${target}` : 'lvb ping', line, currentPrompt);
+      await callRealLb(target ? `lb ping ${target}` : 'lb ping', line, currentPrompt);
       return;
     }
 
     if (line === '/channels') {
-      await callRealLvb('lvb channels', line, currentPrompt);
+      await callRealLb('lb channels', line, currentPrompt);
       return;
     }
 
     if (line === '/tasks') {
-      await callRealLvb('lvb tasks', line, currentPrompt);
+      await callRealLb('lb tasks', line, currentPrompt);
       return;
     }
 
     if (line === '/conformance') {
-      await callRealLvb('lvb conformance', line, currentPrompt);
+      await callRealLb('lb conformance', line, currentPrompt);
       return;
     }
 
     if (line === '/setup') {
-      await callRealLvb(`lvb setup --channel ${tuiChannel}`, line, currentPrompt);
+      await callRealLb(`lb setup --channel ${tuiChannel}`, line, currentPrompt);
       return;
     }
 
     if (line.startsWith('/read')) {
       const limit = Number(line.slice(5).trim()) || 10;
-      await callRealLvb(`lvb read ${tuiChannel} --limit ${limit}`, line, currentPrompt);
+      await callRealLb(`lb read ${tuiChannel} --limit ${limit}`, line, currentPrompt);
       return;
     }
 
@@ -343,10 +343,10 @@ export function CommandPromptWindow({
       return;
     }
 
-    // Plain message -> post live via real `lvb post` so it appears in #agent-bridge immediately!
+    // Plain message -> post live via real `lb post` so it appears in #agent-bridge immediately!
     const escaped = line.replace(/"/g, '\\"');
-    await callRealLvb(
-      `lvb post ${tuiChannel} "${escaped}" --as ${tuiActor}`,
+    await callRealLb(
+      `lb post ${tuiChannel} "${escaped}" --as ${tuiActor}`,
       line,
       currentPrompt
     );
@@ -372,13 +372,13 @@ export function CommandPromptWindow({
       return;
     }
 
-    if (result.kind === 'enter_lvb_attach') {
+    if (result.kind === 'enter_lb_attach') {
       await enterTuiAttach(result.channel, result.asActor);
       return;
     }
 
-    if (result.kind === 'forward_lvb_cli') {
-      await callRealLvb(result.command, cmd);
+    if (result.kind === 'forward_lb_cli') {
+      await callRealLb(result.command, cmd);
       return;
     }
 
@@ -466,12 +466,12 @@ export function CommandPromptWindow({
 
   const connectedAgents = state.actors.filter((a) => a.kind === 'agent').length;
   const activePromptLabel = tuiAttached
-    ? `lvb (#${tuiChannel} as ${tuiActor})>`
-    : 'C:\\VERCEL-BOARD>';
+    ? `lb (#${tuiChannel} as ${tuiActor})>`
+    : 'C:\\LOCAL-BOARD>';
 
   return (
     <div className="flex flex-1 flex-col min-h-0 win98-surface">
-      {/* Quick Real `lvb` CLI & TUI Toolbar */}
+      {/* Quick Real `lb` CLI & TUI Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-1.5 px-2 py-1 border-b border-[#808080] text-[11px] shrink-0">
         <div className="flex flex-wrap items-center gap-1">
           <button
@@ -485,7 +485,7 @@ export function CommandPromptWindow({
             }`}
           >
             <TerminalSquare size={11} />
-            <span>{tuiAttached ? 'Detach TUI (/quit)' : 'lvb attach (TUI)'}</span>
+            <span>{tuiAttached ? 'Detach TUI (/quit)' : 'lb attach (TUI)'}</span>
           </button>
           <button
             type="button"
@@ -493,11 +493,11 @@ export function CommandPromptWindow({
             onClick={() =>
               tuiAttached
                 ? void handleTuiInput('/status')
-                : void runCommand('lvb status')
+                : void runCommand('lb status')
             }
             className="win98-button px-2 py-0.5 text-[11px] font-medium"
           >
-            lvb status
+            lb status
           </button>
           <button
             type="button"
@@ -505,12 +505,12 @@ export function CommandPromptWindow({
             onClick={() =>
               tuiAttached
                 ? void handleTuiInput('/conformance')
-                : void runCommand('lvb conformance')
+                : void runCommand('lb conformance')
             }
             className="win98-button inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium"
           >
             <CheckCircle2 size={11} className="text-[#15803d]" />
-            <span>lvb conformance</span>
+            <span>lb conformance</span>
           </button>
           <button
             type="button"
@@ -518,19 +518,19 @@ export function CommandPromptWindow({
             onClick={() =>
               tuiAttached
                 ? void handleTuiInput('/ping')
-                : void runCommand('lvb ping')
+                : void runCommand('lb ping')
             }
             className="win98-button px-2 py-0.5 text-[11px] font-medium"
           >
-            lvb ping
+            lb ping
           </button>
           <button
             type="button"
             disabled={running}
-            onClick={() => void runCommand(tuiAttached ? '/setup' : 'lvb help')}
+            onClick={() => void runCommand(tuiAttached ? '/setup' : 'lb help')}
             className="win98-button px-2 py-0.5 text-[11px] font-medium"
           >
-            {tuiAttached ? '/setup' : 'lvb help'}
+            {tuiAttached ? '/setup' : 'lb help'}
           </button>
           {!tuiAttached && (
             <button
@@ -564,9 +564,9 @@ export function CommandPromptWindow({
       >
         {entries.length === 0 ? (
           <div className="text-[#94a3b8]">
-            Screen cleared. Try <span className="text-[#4ade80]">lvb attach</span>,{' '}
-            <span className="text-[#7dd3fc]">lvb status</span>, or{' '}
-            <span className="text-[#4ade80]">lvb conformance</span>.
+            Screen cleared. Try <span className="text-[#4ade80]">lb attach</span>,{' '}
+            <span className="text-[#7dd3fc]">lb status</span>, or{' '}
+            <span className="text-[#4ade80]">lb conformance</span>.
           </div>
         ) : (
           entries.map((entry) => (
@@ -574,7 +574,7 @@ export function CommandPromptWindow({
               {entry.command && (
                 <div className="text-[#f8fafc] font-bold mb-0.5">
                   <span className="text-[#94a3b8]">
-                    {entry.promptPrefix || 'C:\\VERCEL-BOARD>'}
+                    {entry.promptPrefix || 'C:\\LOCAL-BOARD>'}
                   </span>{' '}
                   {entry.command}
                 </div>
@@ -651,7 +651,7 @@ export function CommandPromptWindow({
             placeholder={
               tuiAttached
                 ? 'Type message to post, or /status /ping /tasks /as grok /conformance /quit'
-                : 'lvb attach | lvb status | lvb conformance | lvb post agent-bridge "hi" --as grok'
+                : 'lb attach | lb status | lb conformance | lb post agent-bridge "hi" --as grok'
             }
             className="flex-1 bg-transparent text-[#f8fafc] placeholder:text-[#64748b] focus:outline-none min-w-0"
           />
@@ -671,8 +671,8 @@ export function CommandPromptWindow({
           <Terminal size={11} />
           <span>
             {tuiAttached
-              ? `lvb attach TUI (@poppinss/cliui) · x-board-profile: ${tuiActor}`
-              : 'Real `lvb` CLI Runner + MS-DOS Simulator'}
+              ? `lb attach TUI (@poppinss/cliui) · x-board-profile: ${tuiActor}`
+              : 'Real `lb` CLI Runner + MS-DOS Simulator'}
           </span>
         </span>
         <span className="inline-flex items-center gap-1.5 tabular-nums">

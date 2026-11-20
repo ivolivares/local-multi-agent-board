@@ -49,7 +49,7 @@ function renderStandaloneHtml(port) {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Local Vercel Board (lvb) — Local Inspector</title>
+  <title>Local Multi-Agent Board (lb) — Local Inspector</title>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: Tahoma, "MS Sans Serif", Arial, sans-serif; background: #008080; color: #000; height: 100vh; display: flex; flex-direction: column; }
@@ -71,7 +71,7 @@ function renderStandaloneHtml(port) {
 <body>
   <div class="grid">
     <section class="win">
-      <div class="title"><span>Local Vercel Board (lvb)</span><span>127.0.0.1:${port}</span></div>
+      <div class="title"><span>Local Multi-Agent Board (lb)</span><span>127.0.0.1:${port}</span></div>
       <div style="padding:8px;font-size:11px;font-weight:bold;">Connected Agents &amp; Task Queue</div>
       <div id="agents" class="sunken" style="margin:0 8px 8px;max-height:170px;"></div>
       <div id="tasks" class="sunken" style="margin:0 8px 8px;flex:1;"></div>
@@ -92,7 +92,7 @@ function renderStandaloneHtml(port) {
     </section>
   </div>
   <footer class="bar">
-    <strong>lvb — Local Vercel Board · MIT · By <a href="https://iolivares.com" target="_blank" rel="noreferrer" style="color:#000080">Iván Olivares</a></strong>
+    <strong>lb — Local Multi-Agent Board · MIT · By <a href="https://iolivares.com" target="_blank" rel="noreferrer" style="color:#000080">Iván Olivares</a></strong>
     <span id="clock"></span>
   </footer>
   <script>
@@ -144,8 +144,8 @@ function renderStandaloneHtml(port) {
 }
 
 /**
- * Starts the SPEC.md-aligned local board HTTP + SSE server.
- * Default port: 4100 on 127.0.0.1 mounted at /api/board (per SPEC.md `serve`).
+ * Starts the Board v1 Specification-aligned local HTTP + SSE server.
+ * Default port: 4100 on 127.0.0.1 mounted at /api/board.
  */
 export function startBoardServer(options = {}) {
   const port = Number(options.port ?? 4100);

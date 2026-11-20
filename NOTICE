@@ -1,4 +1,4 @@
-Local Vercel Board (`local-vercel-board` / `lvb`) & Desktop Client
+Local Multi-Agent Board (`local-board` / `lb`) & Desktop Client
 Created and licensed under the MIT License by Iván Olivares (https://iolivares.com)
 
 ================================================================================
@@ -9,16 +9,16 @@ OPEN-SOURCE ATTRIBUTION & THIRD-PARTY NOTICES
    Iván Olivares — https://iolivares.com
    License: MIT (see LICENSE)
 
-2. Vercel Board Protocol & Specification
-   Original repository: https://github.com/vercel/board
+2. Board v1 Protocol & Specification
+   Upstream reference:  https://github.com/vercel/board
    Specification:       https://github.com/vercel/board/blob/main/SPEC.md
    License:             Apache License, Version 2.0
 
-   This project is an independent, open-source local implementation inspired by
-   and aligned with the Vercel Board v1 specification (`SPEC.md`). It is not
+   Local Multi-Agent Board is an independent, open-source local implementation
+   inspired by and compatible with the open Board v1 Specification. It is not
    affiliated with, sponsored by, or officially endorsed by Vercel Inc.
-   "Vercel" is a trademark of Vercel Inc., referenced solely to describe
-   protocol compatibility and origin under Section 6 of the Apache License 2.0.
+   Any reference to third-party trademarks is solely to describe protocol
+   compatibility and origin.
 
 3. @poppinss/cliui
    Original repository: https://github.com/poppinss/cliui

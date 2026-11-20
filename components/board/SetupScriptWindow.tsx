@@ -40,27 +40,27 @@ export function SetupScriptWindow({
     [origin, selectedChannel, boardName]
   );
 
-  const lvbQuickCommands = useMemo(
+  const lbQuickCommands = useMemo(
     () => [
       {
-        id: 'lvb-serve-attach',
-        label: 'Start Local SPEC Server (:4100) + Interactive TUI (@poppinss/cliui)',
-        command: `npx local-vercel-board serve --port 4100 --dir .board --attach`,
+        id: 'lb-serve-attach',
+        label: 'Start Local Board Server (:4100) + Interactive TUI (@poppinss/cliui)',
+        command: `npx local-board serve --port 4100 --dir .board --attach`,
       },
       {
-        id: 'lvb-attach',
+        id: 'lb-attach',
         label: 'Attach Interactive TUI to This Running Board',
-        command: `lvb attach --url ${origin} --channel ${selectedChannel} --as developer`,
+        command: `lb attach --url ${origin} --channel ${selectedChannel} --as developer`,
       },
       {
-        id: 'lvb-setup',
+        id: 'lb-setup',
         label: 'Run Setup Wizard (Replaces setup-board.sh)',
-        command: `lvb setup --channel ${selectedChannel} --url ${origin} --handshake`,
+        command: `lb setup --channel ${selectedChannel} --url ${origin} --handshake`,
       },
       {
-        id: 'lvb-conformance',
-        label: 'Verify Vercel Board v1 SPEC.md Conformance (7 Live Checks)',
-        command: `lvb conformance --url http://127.0.0.1:4100`,
+        id: 'lb-conformance',
+        label: 'Verify Board v1 Specification Conformance (7 Live Checks)',
+        command: `lb conformance --url http://127.0.0.1:4100`,
       },
     ],
     [origin, selectedChannel]
@@ -72,19 +72,19 @@ export function SetupScriptWindow({
         id: 'claude-code',
         label: 'Claude Code CLI',
         profile: 'claude-code',
-        command: `BOARD_URL=${origin}/api/board claude "Join local board #${selectedChannel} using lvb --as claude-code (sends x-board-profile). Run lvb whoami, lvb read ${selectedChannel}, post status, then lvb wait ${selectedChannel} --json to collaborate with @grok and @antigravity."`,
+        command: `BOARD_URL=${origin}/api/board claude "Join local board #${selectedChannel} using lb --as claude-code (sends x-board-profile). Run lb whoami, lb read ${selectedChannel}, post status, then lb wait ${selectedChannel} --json to collaborate with @grok and @antigravity."`,
       },
       {
         id: 'grok',
         label: 'Grok CLI',
         profile: 'grok',
-        command: `BOARD_URL=${origin}/api/board grok "Use lvb --as grok on #${selectedChannel}. Read recent messages, review diffs from @claude-code, claim tasks via lvb tasks claim --ready ${selectedChannel} --json, and listen with lvb wait ${selectedChannel} --json."`,
+        command: `BOARD_URL=${origin}/api/board grok "Use lb --as grok on #${selectedChannel}. Read recent messages, review diffs from @claude-code, claim tasks via lb tasks claim --ready ${selectedChannel} --json, and listen with lb wait ${selectedChannel} --json."`,
       },
       {
         id: 'antigravity',
         label: 'Gemini Antigravity CLI',
         profile: 'antigravity',
-        command: `BOARD_URL=${origin}/api/board antigravity "Connect to local board #${selectedChannel} using lvb --as antigravity. Read ${selectedChannel}, verify UI & tests once @claude-code and @grok post, and complete tasks with lvb tasks complete."`,
+        command: `BOARD_URL=${origin}/api/board antigravity "Connect to local board #${selectedChannel} using lb --as antigravity. Read ${selectedChannel}, verify UI & tests once @claude-code and @grok post, and complete tasks with lb tasks complete."`,
       },
     ],
     [origin, selectedChannel]
@@ -126,10 +126,10 @@ export function SetupScriptWindow({
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#808080] pb-2">
         <div className="space-y-0.5">
           <p className="font-bold text-[13px]">
-            Local Vercel Board CLI &amp; Interactive TUI (<code>local-vercel-board</code> / <code>lvb</code>)
+            Local Multi-Agent Board CLI &amp; Interactive TUI (<code>local-board</code> / <code>lb</code>)
           </p>
           <p className="text-[11px] opacity-85">
-            MIT open-source CLI aligned with <strong>vercel/board SPEC.md</strong> &amp;{' '}
+            MIT open-source CLI implementing the <strong>Board v1 Specification</strong> &amp;{' '}
             <code className="font-code">@poppinss/cliui</code> · by{' '}
             <a
               href="https://iolivares.com"
@@ -166,7 +166,7 @@ export function SetupScriptWindow({
               className="win98-button inline-flex items-center gap-1 px-2 py-1 text-[11px] font-bold whitespace-nowrap"
             >
               <TerminalSquare size={11} />
-              Try lvb TUI Here
+              Try lb TUI Here
             </button>
           )}
           <button
@@ -187,13 +187,13 @@ export function SetupScriptWindow({
         </div>
       )}
 
-      {/* 1. lvb CLI & @poppinss/cliui TUI Quick Commands */}
+      {/* 1. lb CLI & @poppinss/cliui TUI Quick Commands */}
       <div className="space-y-1.5">
         <div className="font-bold text-[12px]">
-          1. Run the Open-Source <code>lvb</code> CLI &amp; Interactive TUI
+          1. Run the Open-Source <code>lb</code> CLI &amp; Interactive TUI
         </div>
         <div className="grid grid-cols-1 gap-1.5">
-          {lvbQuickCommands.map((item) => (
+          {lbQuickCommands.map((item) => (
             <div key={item.id} className="win98-raised p-2 space-y-1">
               <div className="flex items-center justify-between gap-2">
                 <span className="font-bold text-[11px]">{item.label}</span>
@@ -246,11 +246,11 @@ export function SetupScriptWindow({
         </div>
       </div>
 
-      {/* 3. Legacy Bash Wrapper (delegates to `lvb setup`) */}
+      {/* 3. Legacy Bash Wrapper (delegates to `lb setup`) */}
       <div className="flex-1 min-h-[150px] flex flex-col gap-1">
         <div className="flex items-center justify-between gap-2">
           <span className="font-bold text-[12px]">
-            3. Optional Bash Wrapper (<code>scripts/setup-board.sh</code> → delegates to <code>lvb setup</code>)
+            3. Optional Bash Wrapper (<code>scripts/setup-board.sh</code> → delegates to <code>lb setup</code>)
           </span>
           <div className="flex items-center gap-1.5">
             <button

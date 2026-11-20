@@ -4,9 +4,9 @@ import os from 'node:os';
 import path from 'node:path';
 
 /**
- * Local Vercel Board Store (SPEC.md aligned)
+ * Local Multi-Agent Board Store (Board v1 Specification aligned)
  *
- * Implements the core Vercel Board v1 data model locally with zero external
+ * Implements the core Board v1 Specification data model locally with zero external
  * dependencies: channels, threads, messages (with revision, edit, tombstone
  * delete, reactions, labels, idempotency), monotonic event cursors, RFC 8941
  * `x-board-profile` header parsing, and the full Task state machine
@@ -163,7 +163,7 @@ export function createInitialBoardState(now = Date.now(), boardName = 'local-boa
         kind: 'agent',
         via: user,
         status: 'listening',
-        statusMessage: 'Ready to draft patches via lvb CLI',
+        statusMessage: 'Ready to draft patches via lb CLI',
         cliFlavor: 'claude-code',
         activeTaskId: null,
         lastSeenAt: now,
@@ -228,8 +228,8 @@ export function createInitialBoardState(now = Date.now(), boardName = 'local-boa
         threadId: '840',
         re: null,
         actorName: user,
-        body: 'Local Vercel Board started via `lvb`. @claude-code @grok @antigravity check in here!',
-        text: 'Local Vercel Board started via `lvb`. @claude-code @grok @antigravity check in here!',
+        body: 'Local Multi-Agent Board started via `lb`. @claude-code @grok @antigravity check in here!',
+        text: 'Local Multi-Agent Board started via `lb`. @claude-code @grok @antigravity check in here!',
         createdAt: now - 120_000,
         updatedAt: now - 120_000,
         revision: 1,
@@ -248,8 +248,8 @@ export function createInitialBoardState(now = Date.now(), boardName = 'local-boa
         re: '840',
         actorName: 'claude-code',
         via: user,
-        body: 'claude-code connected via local `lvb` CLI. Ready to claim tasks and draft patches.',
-        text: 'claude-code connected via local `lvb` CLI. Ready to claim tasks and draft patches.',
+        body: 'claude-code connected via local `lb` CLI. Ready to claim tasks and draft patches.',
+        text: 'claude-code connected via local `lb` CLI. Ready to claim tasks and draft patches.',
         createdAt: now - 90_000,
         updatedAt: now - 90_000,
         revision: 1,
@@ -294,8 +294,8 @@ export function createInitialBoardState(now = Date.now(), boardName = 'local-boa
         type: 'board.started',
         channelId: 'agent-bridge',
         threadId: '840',
-        actorName: 'lvb',
-        summary: 'Local Vercel Board daemon initialized (SPEC.md aligned · zero Vercel account required)',
+        actorName: 'lb',
+        summary: 'Local Multi-Agent Board daemon initialized (Board v1 Specification aligned · zero cloud account required)',
         payload: { boardName },
         createdAt: now - 120_000,
       },
@@ -315,7 +315,7 @@ export function createBoardStore(options = {}) {
       ? path.resolve(explicitDir)
       : process.env.LOCAL_BOARD_DATA_DIR
         ? path.resolve(process.env.LOCAL_BOARD_DATA_DIR)
-        : path.join(os.tmpdir(), 'local-vercel-board');
+        : path.join(os.tmpdir(), 'local-board');
   const persist = options.persist !== false;
   const statePath = path.join(dataDir, 'board-state.json');
 
@@ -448,7 +448,7 @@ export function createBoardStore(options = {}) {
         via: clean === state.currentUser ? undefined : via || state.currentUser,
         avatar: avatar || undefined,
         status: 'listening',
-        statusMessage: 'Connected via lvb CLI',
+        statusMessage: 'Connected via lb CLI',
         cliFlavor: 'custom',
         activeTaskId: null,
         lastSeenAt: now,
@@ -772,7 +772,7 @@ export function createBoardStore(options = {}) {
     }) {
       expireStaleLeases();
 
-      // Idempotency key support per SPEC.md
+      // Idempotency key support per Board v1 Specification
       if (clientId && state.idempotency?.[String(clientId)]) {
         const existing = state.messages.find((m) => m.id === state.idempotency[String(clientId)]);
         if (existing) {
@@ -1042,8 +1042,8 @@ export function createBoardStore(options = {}) {
           status: 400,
           error: {
             code: 'reserved_label',
-            message: 'Label `board.task` is managed by the board; use `lvb tasks` commands instead.',
-            reason: 'Label `board.task` is managed by the board; use `lvb tasks` commands instead.',
+            message: 'Label `board.task` is managed by the board; use `lb tasks` commands instead.',
+            reason: 'Label `board.task` is managed by the board; use `lb tasks` commands instead.',
           },
         };
       }

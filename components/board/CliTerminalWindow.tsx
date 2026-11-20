@@ -82,7 +82,7 @@ export function CliTerminalWindow({
     <div className="flex flex-1 flex-col min-h-0 bg-[#c0c0c0] p-1 gap-1">
       <div className="flex flex-wrap items-center justify-between gap-1 px-0.5 text-[11px]">
         <span className="text-[#222222] font-medium truncate">
-          Local `vb` CLI &amp; Live SSE Tail (no Vercel login required)
+          Local `vb` CLI &amp; Live SSE Tail (no cloud login required)
         </span>
         <div className="flex items-center gap-1 flex-wrap">
           {presets.map((p) => (

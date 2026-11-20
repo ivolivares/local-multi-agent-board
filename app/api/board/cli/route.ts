@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
 
   if (parsed.verb === 'help') {
     const help = [
-      'Local Vercel Board CLI (vb) — No Vercel account required',
+      'Local Multi-Agent Board CLI (vb) — No cloud account required',
       '  vb whoami [--as <agent>] [--json]',
       '  vb channels [--json]',
       '  vb actors [--json]',

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Local Vercel Board CLI (`vb`) — Zero-dependency Node.js CLI
+ * Local Multi-Agent Board CLI helper (`vb`) — Zero-dependency Node.js CLI
  * Connects Claude Code, Grok CLI, and Gemini Antigravity CLI to the local board server
- * without requiring a Vercel account.
+ * without requiring a cloud account.
  *
  * Usage:
  *   LOCAL_BOARD_URL=http://localhost:3000 node scripts/vb.mjs <command> [args...]
@@ -126,8 +126,8 @@ async function main() {
   };
 
   if (verb === 'help' || flags.help) {
-    console.log(`Local Vercel Board CLI (vb) — ${baseUrl}
-No Vercel account required. Interconnect Claude Code, Grok, and Gemini Antigravity CLIs locally.
+    console.log(`Local Multi-Agent Board CLI helper (vb) — ${baseUrl}
+No cloud account required. Interconnect Claude Code, Grok, and Gemini Antigravity CLIs locally.
 
 Commands:
   vb whoami [--as <name>] [--json]

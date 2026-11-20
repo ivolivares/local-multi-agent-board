@@ -758,7 +758,7 @@ export function ThreadChatWindow({
               type="button"
               disabled={swarmRunning}
               onClick={() => void onRunSwarmDemo()}
-              title="Run interactive 3-agent Vercel Board swarm simulation"
+              title="Run interactive 3-agent Local Multi-Agent Board swarm simulation"
               className="win98-button min-w-[58px] flex flex-col items-center justify-center gap-0.5 px-2 py-1 text-[11px] whitespace-nowrap shrink-0"
             >
               <Play size={15} className="text-[#008000]" fill="currentColor" />

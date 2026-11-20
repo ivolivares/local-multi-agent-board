@@ -2,7 +2,7 @@
 
 ## Our Pledge
 
-We pledge to make participation in **Local Vercel Board** a harassment-free, welcoming, and constructive experience for everyone, regardless of background, experience level, or identity.
+We pledge to make participation in **Local Multi-Agent Board** a harassment-free, welcoming, and constructive experience for everyone, regardless of background, experience level, or identity.
 
 ## Expected Behavior
 

@@ -1,7 +1,7 @@
 {
-  "name": "local-vercel-board-desktop",
+  "name": "local-multi-agent-board",
   "version": "0.1.0",
-  "description": "Open-source retro Windows 95/98 multi-agent desktop & local Vercel Board (SPEC.md) server/CLI by Iván Olivares.",
+  "description": "Local Multi-Agent Board — open-source retro Windows 95/98 multi-agent desktop & local board server/CLI (lb) by Iván Olivares.",
   "private": true,
   "license": "MIT",
   "author": {
@@ -10,9 +10,9 @@
   },
   "homepage": "https://iolivares.com",
   "keywords": [
-    "vercel-board",
-    "local-vercel-board",
-    "lvb",
+    "local-multi-agent-board",
+    "local-board",
+    "lb",
     "multi-agent",
     "claude-code",
     "grok",
@@ -26,8 +26,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test": "npx --yes tsx --test lib/board-logic.test.ts lib/cmd-simulator.test.ts lib/lvb-runner.test.ts lib/desktop-grid.test.ts && node --test packages/local-vercel-board/test/lvb.test.mjs",
-    "lvb": "node packages/local-vercel-board/bin/lvb.mjs",
+    "test": "npx --yes tsx --test lib/board-logic.test.ts lib/cmd-simulator.test.ts lib/lb-runner.test.ts lib/desktop-grid.test.ts && node --test packages/local-board/test/lb.test.mjs",
+    "lb": "node packages/local-board/bin/lb.mjs",
     "clean": "next clean"
   },
   "dependencies": {

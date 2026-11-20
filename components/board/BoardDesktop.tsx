@@ -936,7 +936,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
   const taskbarButtons: TaskbarButtonItem[] = [
     {
       id: 'buddy',
-      label: 'Vercel Instant Mess...',
+      label: 'Local Multi-Agent...',
       mobileLabel: 'Board',
       active: isMobile
         ? mobileWin === 'buddy'
@@ -983,7 +983,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       ? [
           {
             id: 'setup',
-            label: 'lvb setup',
+            label: 'lb setup',
             mobileLabel: 'Setup',
             active: isMobile
               ? mobileWin === 'setup'
@@ -1118,11 +1118,11 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         />
       )}
 
-      {/* Window 1: Vercel Instant Messenger (Buddy List / Channels / Tasks) */}
+      {/* Window 1: Local Multi-Agent Board (Buddy List / Channels / Tasks) */}
       {shouldRenderWindow('buddy') && (
         <Win98Window
           id="buddy"
-          title="Vercel Instant Messenger"
+          title="Local Multi-Agent Board"
           active={activeWin === 'buddy'}
           zIndex={windows.buddy.z}
           rect={windows.buddy.rect}
@@ -1198,7 +1198,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       {shouldRenderWindow('chat') && activeThread && (
         <Win98Window
           id="chat"
-          title={`#${activeThread.channelId} : thread ${activeThread.id} - Vercel Instant Messenger`}
+          title={`#${activeThread.channelId} : thread ${activeThread.id} - Local Multi-Agent Board`}
           active={activeWin === 'chat'}
           zIndex={windows.chat.z}
           rect={windows.chat.rect}
@@ -1246,7 +1246,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       {shouldRenderWindow('mention') && activeMention && (
         <Win98Window
           id="mention"
-          title="Vercel Instant Messenger"
+          title="Local Multi-Agent Board"
           active={activeWin === 'mention'}
           zIndex={windows.mention.z}
           rect={windows.mention.rect}
@@ -1295,11 +1295,11 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         </Win98Window>
       )}
 
-      {/* Window 6: lvb CLI & Interactive TUI Setup */}
+      {/* Window 6: lb CLI & Interactive TUI Setup */}
       {shouldRenderWindow('setup') && (
         <Win98Window
           id="setup"
-          title="lvb setup — Local Vercel Board CLI & TUI"
+          title="lb setup — Local Multi-Agent Board CLI & TUI"
           active={activeWin === 'setup'}
           zIndex={windows.setup.z}
           rect={windows.setup.rect}
@@ -1374,7 +1374,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
       {shouldRenderWindow('cmd') && (
         <Win98Window
           id="cmd"
-          title="Command Prompt — C:\VERCEL-BOARD"
+          title="Command Prompt — C:\LOCAL-BOARD"
           active={activeWin === 'cmd'}
           zIndex={windows.cmd.z}
           rect={windows.cmd.rect}
@@ -1584,7 +1584,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
         >
           <div className="w-7 bg-[#000080] flex items-end justify-center pb-2 shrink-0">
             <span className="[writing-mode:vertical-rl] rotate-180 font-editorial font-bold italic text-[13px] tracking-wider text-white">
-              Vercel Board
+              Local Board
             </span>
           </div>
           <div className="win98-surface flex-1 py-1 text-[12px]">
@@ -1608,7 +1608,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
             >
               <Terminal size={14} />
-              <span>Command Prompt (lvb CLI &amp; TUI)</span>
+              <span>Command Prompt (lb CLI &amp; TUI)</span>
             </button>
             <button
               type="button"
@@ -1661,7 +1661,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
             >
               <FileText size={14} />
-              <span>Read readme.md (Vercel Board)</span>
+              <span>Read readme.md (Board Guide)</span>
             </button>
             <button
               type="button"
@@ -1672,7 +1672,7 @@ export function BoardDesktop({ initialState }: BoardDesktopProps) {
               className="flex w-full items-center gap-2 px-3 py-1.5 text-left hover:bg-[#000080] hover:text-white"
             >
               <FileCode2 size={14} />
-              <span>Local Board CLI &amp; TUI (lvb setup)</span>
+              <span>Local Board CLI &amp; TUI (lb setup)</span>
             </button>
             <button
               type="button"

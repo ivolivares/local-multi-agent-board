@@ -17,7 +17,7 @@ export function renderStatusTable(ui, state, activeChannel, baseUrl) {
   );
 
   ui.sticker()
-    .heading(`Local Vercel Board — ${state.boardName || 'local-board'}`)
+    .heading(`Local Multi-Agent Board — ${state.boardName || 'local-board'}`)
     .add(`Endpoint:  ${ui.colors.cyan(baseUrl)}`)
     .add(`Channel:   ${ui.colors.green(`#${activeChannel}`)}`)
     .add(`Agents:    ${ui.colors.bold(String(agents.length))} connected`)
@@ -29,7 +29,7 @@ export function renderStatusTable(ui, state, activeChannel, baseUrl) {
   for (const a of agents) {
     table.row([
       ui.colors.cyan(a.name),
-      a.cliFlavor || 'local-lvb',
+      a.cliFlavor || 'local-lb',
       a.status === 'busy'
         ? ui.colors.yellow(a.status.toUpperCase())
         : ui.colors.green(a.status.toUpperCase()),
@@ -54,7 +54,7 @@ export async function runInteractiveCli(options = {}) {
     state = await apiJson(baseUrl, '/api/board/state');
   } catch (err) {
     ui.logger.error(
-      `Cannot connect to Local Vercel Board at ${baseUrl}. Start it with \`lvb ui\` or \`npm run dev\`.`
+      `Cannot connect to Local Multi-Agent Board at ${baseUrl}. Start it with \`lb serve\` or \`npm run dev\`.`
     );
     ui.logger.debug(err instanceof Error ? err.message : String(err));
     return;
@@ -112,12 +112,12 @@ export async function runInteractiveCli(options = {}) {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
-    prompt: `${ui.colors.cyan('lvb')} (${ui.colors.green(`#${activeChannel}`)} as ${ui.colors.yellow(activeActor)})> `,
+    prompt: `${ui.colors.cyan('lb')} (${ui.colors.green(`#${activeChannel}`)} as ${ui.colors.yellow(activeActor)})> `,
   });
 
   const refreshPrompt = () => {
     rl.setPrompt(
-      `${ui.colors.cyan('lvb')} (${ui.colors.green(`#${activeChannel}`)} as ${ui.colors.yellow(activeActor)})> `
+      `${ui.colors.cyan('lb')} (${ui.colors.green(`#${activeChannel}`)} as ${ui.colors.yellow(activeActor)})> `
     );
   };
 
@@ -138,7 +138,7 @@ export async function runInteractiveCli(options = {}) {
 
     if (line === '/help') {
       ui.instructions()
-        .heading('lvb Interactive Commands')
+        .heading('lb Interactive Commands')
         .add('/status               Show live daemon & agent table')
         .add('/ping [agent]         Ping connected CLI agents')
         .add('/read [limit]         Read recent messages in current channel')
@@ -280,7 +280,7 @@ export async function runInteractiveCli(options = {}) {
   await new Promise((resolve) => {
     rl.on('close', () => {
       abortController.abort();
-      ui.logger.info('Detached from Local Vercel Board.');
+      ui.logger.info('Detached from Local Multi-Agent Board.');
       resolve();
     });
   });

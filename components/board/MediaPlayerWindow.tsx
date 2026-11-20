@@ -25,7 +25,7 @@ const SCENES: SceneDef[] = [
   {
     id: 0,
     title: '1. Connect & Take an Agent Name',
-    subtitle: 'vercel board whoami --as <name> --json',
+    subtitle: 'lb whoami --as <name> --json',
     startSec: 0,
     endSec: 5,
   },
@@ -46,14 +46,14 @@ const SCENES: SceneDef[] = [
   {
     id: 3,
     title: '4. Block & Listen with Wait',
-    subtitle: 'vercel board wait <threadId> --json',
+    subtitle: 'lb wait <threadId> --json',
     startSec: 15,
     endSec: 20,
   },
   {
     id: 4,
-    title: '5. Local CLI & TUI (lvb) or Vercel Cloud',
-    subtitle: 'npx local-vercel-board serve --attach · lvb conformance',
+    title: '5. Local CLI & TUI (lb) or Hosted Cloud',
+    subtitle: 'npx local-board serve --attach · lb conformance',
     startSec: 20,
     endSec: 25,
   },
@@ -195,13 +195,13 @@ export function MediaPlayerWindow({
               <div className="w-full max-w-[540px] space-y-2.5">
                 <div className="border border-[#334155] bg-[#020617] p-2.5 font-code text-[11px] space-y-1.5">
                   <div className="text-[#e2e8f0]">
-                    <span className="text-[#86efac]">$</span> vercel board whoami --as claude-code --json
+                    <span className="text-[#86efac]">$</span> lb whoami --as claude-code --json
                   </div>
                   <div
                     className="text-[#93c5fd] transition-opacity duration-300"
                     style={{ opacity: sceneProgress > 0.2 ? 1 : 0.15 }}
                   >
-                    {`{ "board": "vercel-labs", "user": "ctate", "profile": "claude-code" }`}
+                    {`{ "board": "local-board", "user": "ctate", "profile": "claude-code" }`}
                   </div>
                 </div>
 
@@ -244,10 +244,10 @@ export function MediaPlayerWindow({
               <div className="w-full max-w-[540px] space-y-2.5">
                 <div className="grid grid-cols-2 gap-2 font-code text-[10.5px]">
                   {[
-                    { cmd: 'vercel board channels --json', out: '#agent-bridge · #screen-relay · #work/checkout', at: 0.1 },
-                    { cmd: 'vercel board read --limit 20', out: 'Reads recent thread history before replying', at: 0.3 },
-                    { cmd: 'vercel board tasks --json', out: '#842 claimed (claude-code) · #843 ready', at: 0.5 },
-                    { cmd: 'vercel board actors --json', out: '3 people online · 6 CLI agents active', at: 0.7 },
+                    { cmd: 'lb channels --json', out: '#agent-bridge · #screen-relay · #work/checkout', at: 0.1 },
+                    { cmd: 'lb read --limit 20', out: 'Reads recent thread history before replying', at: 0.3 },
+                    { cmd: 'lb tasks --json', out: '#842 claimed (claude-code) · #843 ready', at: 0.5 },
+                    { cmd: 'lb actors --json', out: '3 people online · 6 CLI agents active', at: 0.7 },
                   ].map((card) => {
                     const visible = sceneProgress >= card.at;
                     return (
@@ -343,10 +343,10 @@ export function MediaPlayerWindow({
               <div className="w-full max-w-[540px] space-y-2.5">
                 <div className="border border-[#334155] bg-[#020617] p-2.5 font-code text-[11px] space-y-1.5">
                   <div className="text-[#86efac]">
-                    $ id=$(vercel board post agent-bridge &quot;grok listening here.&quot; --as grok)
+                    $ id=$(lb post agent-bridge &quot;grok listening here.&quot; --as grok)
                   </div>
                   <div className="text-[#fde047]">
-                    $ vercel board wait &quot;$id&quot; --json
+                    $ lb wait &quot;$id&quot; --json
                   </div>
                   <div
                     className="border-t border-[#1e293b] pt-1.5 text-[#f8fafc] transition-opacity duration-300"
@@ -354,11 +354,11 @@ export function MediaPlayerWindow({
                   >
                     {sceneProgress > 0.4
                       ? `-> event: { "type": "message.posted", "actor": "ctate", "body": "@grok check PR #214" }`
-                      : '-> blocking until next board / Slack / GitHub / Linear event...'}
+                      : '-> blocking until next board / SSE / peer event...'}
                   </div>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-[10.5px] font-code">
-                  {['Vercel Board UI', 'Slack Thread', 'GitHub PR', 'Linear Issue'].map(
+                  {['Local Board UI', 'lb attach TUI', 'CLI Agents', 'SSE Stream'].map(
                     (src, idx) => (
                       <span
                         key={src}
@@ -380,35 +380,35 @@ export function MediaPlayerWindow({
               </div>
             )}
 
-            {/* SCENE 5: Local Bridge + Real Vercel Board */}
+            {/* SCENE 5: Local Bridge + Optional Cloud */}
             {currentScene.id === 4 && (
               <div className="w-full max-w-[540px] space-y-2.5">
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="border border-[#4ade80] bg-[#052e16]/50 p-2.5 space-y-1">
                     <div className="text-[11px] font-bold text-[#86efac]">
-                      Local Mode (lvb CLI &amp; TUI · MIT)
+                      Local Mode (lb CLI &amp; TUI · MIT)
                     </div>
                     <p className="font-code text-[10px] text-[#dcfce7]">
-                      npx local-vercel-board serve --attach
+                      npx local-board serve --attach
                     </p>
                     <p className="text-[10.5px] text-[#cbd5e1]">
-                      SPEC.md server on <code className="font-code">:4100</code> + interactive <code className="font-code">@poppinss/cliui</code> TUI (<code className="font-code">lvb attach</code>) &amp; <code className="font-code">lvb conformance</code>.
+                      Board v1 Specification server on <code className="font-code">:4100</code> + interactive <code className="font-code">@poppinss/cliui</code> TUI (<code className="font-code">lb attach</code>) &amp; <code className="font-code">lb conformance</code>.
                     </p>
                   </div>
                   <div className="border border-[#60a5fa] bg-[#172554]/60 p-2.5 space-y-1">
                     <div className="text-[11px] font-bold text-[#93c5fd]">
-                      Team Mode (Vercel Board)
+                      Hosted Mode (Compatible API)
                     </div>
                     <p className="font-code text-[10px] text-[#dbeafe]">
-                      npx skills add vercel/board --skill board
+                      BOARD_URL=https://your-board/api/board
                     </p>
                     <p className="text-[10.5px] text-[#cbd5e1]">
-                      Run <code className="font-code">vercel login</code> and swap <code className="font-code">lvb</code> for <code className="font-code">vercel board</code>.
+                      Uses the same Board v1 Specification HTTP &amp; SSE endpoints—point <code className="font-code">lb</code> at any compatible server.
                     </p>
                   </div>
                 </div>
                 <div className="text-center text-[11px] text-[#f8fafc]">
-                  Try <strong>lvb attach</strong> live in <strong>Command Prompt</strong>, or open <strong>lvb setup</strong> &amp; <strong>readme.md</strong>.
+                  Try <strong>lb attach</strong> live in <strong>Command Prompt</strong>, or open <strong>lb setup</strong> &amp; <strong>readme.md</strong>.
                 </div>
               </div>
             )}

@@ -163,7 +163,7 @@ test('generateSetupScript outputs runnable bash script with Claude Code, Grok, a
   const script = generateSetupScript({
     boardUrl: 'http://localhost:3000',
     channel: 'agent-bridge',
-    boardName: 'vercel-labs',
+    boardName: 'local-board',
   });
   assert.ok(script.startsWith('#!/usr/bin/env bash'));
   assert.ok(script.includes('claude-code'));

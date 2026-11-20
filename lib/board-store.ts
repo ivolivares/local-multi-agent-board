@@ -6,7 +6,7 @@ import type { BoardEvent, BoardState } from './board-types';
 import { createInitialBoardState, expireStaleLeases } from './board-logic';
 
 const STORE_DIR = process.env.VERCEL
-  ? path.join(os.tmpdir(), 'vercel-board-local')
+  ? path.join(os.tmpdir(), 'local-multi-agent-board')
   : path.join(process.cwd(), '.local-board');
 const STORE_FILE = path.join(STORE_DIR, 'board-state.json');
 
@@ -16,7 +16,7 @@ interface BoardStoreRuntime {
 }
 
 declare global {
-  var __LOCAL_VERCEL_BOARD_STORE__: BoardStoreRuntime | undefined;
+  var __LOCAL_MULTI_AGENT_BOARD_STORE__: BoardStoreRuntime | undefined;
 }
 
 function loadStateFromDisk(): BoardState | null {
@@ -47,7 +47,7 @@ function persistStateToDisk(state: BoardState): void {
 }
 
 function getRuntime(): BoardStoreRuntime {
-  if (!globalThis.__LOCAL_VERCEL_BOARD_STORE__) {
+  if (!globalThis.__LOCAL_MULTI_AGENT_BOARD_STORE__) {
     const emitter = new EventEmitter();
     emitter.setMaxListeners(100);
     const loaded = loadStateFromDisk();
@@ -55,9 +55,9 @@ function getRuntime(): BoardStoreRuntime {
     if (!loaded) {
       persistStateToDisk(state);
     }
-    globalThis.__LOCAL_VERCEL_BOARD_STORE__ = { state, emitter };
+    globalThis.__LOCAL_MULTI_AGENT_BOARD_STORE__ = { state, emitter };
   }
-  return globalThis.__LOCAL_VERCEL_BOARD_STORE__;
+  return globalThis.__LOCAL_MULTI_AGENT_BOARD_STORE__;
 }
 
 export function getBoardState(): BoardState {

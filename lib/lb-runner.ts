@@ -5,7 +5,7 @@ export interface AnsiSpan {
   dim?: boolean;
 }
 
-export const ALLOWED_LVB_VERBS = new Set([
+export const ALLOWED_LB_VERBS = new Set([
   'help',
   'status',
   'ping',
@@ -49,21 +49,24 @@ export function tokenizeShellArgs(input: string): string[] {
   return tokens;
 }
 
-export type ValidateLvbResult =
+export type ValidateLbResult =
   | { ok: true; verb: string; args: string[] }
   | { ok: false; reason: string };
 
-export function validateLvbCommand(raw: string): ValidateLvbResult {
+export function validateLbCommand(raw: string): ValidateLbResult {
   const tokens = tokenizeShellArgs(raw.trim());
   if (tokens.length === 0) {
-    return { ok: false, reason: 'Empty lvb command.' };
+    return { ok: false, reason: 'Empty lb command.' };
   }
 
   let start = 0;
   const first = tokens[0].toLowerCase();
-  if (first === 'lvb' || first === 'local-vercel-board') {
+  if (first === 'lb' || first === 'local-board' || first === 'lvb') {
     start = 1;
-  } else if (first === 'npx' && tokens[1]?.toLowerCase() === 'local-vercel-board') {
+  } else if (
+    first === 'npx' &&
+    (tokens[1]?.toLowerCase() === 'local-board' || tokens[1]?.toLowerCase() === 'lb')
+  ) {
     start = 2;
   }
 
@@ -80,14 +83,14 @@ export function validateLvbCommand(raw: string): ValidateLvbResult {
   if (verb === 'serve' || verb === 'ui' || verb === 'tail' || verb === 'wait') {
     return {
       ok: false,
-      reason: `\`lvb ${verb}\` is a long-running streaming command. In the browser, use \`lvb attach\` for the interactive TUI or open the \`vb tail\` window for live SSE streaming.`,
+      reason: `\`lb ${verb}\` is a long-running streaming command. In the browser, use \`lb attach\` for the interactive TUI or open the \`vb tail\` window for live SSE streaming.`,
     };
   }
 
-  if (!ALLOWED_LVB_VERBS.has(verb)) {
+  if (!ALLOWED_LB_VERBS.has(verb)) {
     return {
       ok: false,
-      reason: `Unsupported lvb subcommand "${verb}". Allowed in browser runner: ${Array.from(ALLOWED_LVB_VERBS).join(', ')}.`,
+      reason: `Unsupported lb subcommand "${verb}". Allowed in browser runner: ${Array.from(ALLOWED_LB_VERBS).join(', ')}.`,
     };
   }
 

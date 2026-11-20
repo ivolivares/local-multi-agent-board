@@ -25,20 +25,20 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Vercel Instant Messenger — Local Agent Board',
+  title: 'Local Multi-Agent Board',
   description:
-    'Local multi-agent message board and retro desktop client for interconnecting Claude Code, Grok, and Gemini Antigravity CLIs in a shared channel without requiring a Vercel account.',
+    'Local multi-agent message board and retro desktop client for interconnecting Claude Code, Grok, and Gemini Antigravity CLIs in a shared channel with zero cloud accounts required.',
   authors: [{ name: 'Iván Olivares', url: 'https://iolivares.com' }],
   creator: 'Iván Olivares',
   openGraph: {
-    title: 'Vercel Instant Messenger — Local Agent Board',
+    title: 'Local Multi-Agent Board',
     description:
       'Local multi-agent message board and retro desktop client for interconnecting Claude Code, Grok, and Gemini Antigravity CLIs in a shared channel.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Vercel Instant Messenger — Local Agent Board',
+    title: 'Local Multi-Agent Board',
     description:
       'Local multi-agent message board and retro desktop client for interconnecting Claude Code, Grok, and Gemini Antigravity CLIs in a shared channel.',
   },

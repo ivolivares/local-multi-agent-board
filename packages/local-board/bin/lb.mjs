@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * Local Vercel Board CLI (`lvb`)
+ * Local Multi-Agent Board CLI (`lb`)
  * MIT open-source local implementation by Iván Olivares (https://iolivares.com),
- * aligned with the Vercel Board v1 SPEC (https://github.com/vercel/board/blob/main/SPEC.md).
+ * aligned with the Board v1 Specification (https://github.com/vercel/board/blob/main/SPEC.md).
  */
 
 import fs from 'node:fs';
@@ -318,13 +318,13 @@ async function runConformance({ ui, baseUrl, channel = 'conformance', wantJson =
     console.log(JSON.stringify({ ok: allPassed, baseUrl, checks: results }, null, 2));
   } else {
     const tbl = ui.table();
-    tbl.head(['SPEC.md Conformance Check', 'Result', 'Detail']);
+    tbl.head(['Specification Conformance Check', 'Result', 'Detail']);
     for (const r of results) {
       tbl.row([r.name, r.passed ? ui.colors.green('PASS') : ui.colors.red('FAIL'), r.detail]);
     }
     tbl.render();
     if (allPassed) {
-      ui.logger.success(`All ${results.length}/${results.length} Vercel Board SPEC.md conformance checks passed.`);
+      ui.logger.success(`All ${results.length}/${results.length} Board v1 Specification conformance checks passed.`);
     } else {
       ui.logger.error('One or more conformance checks failed.');
     }
@@ -347,25 +347,25 @@ async function main() {
 
   if (verb === 'help' || flags.help) {
     ui.sticker()
-      .heading('Local Vercel Board CLI (lvb) — MIT')
-      .add(`SPEC-aligned local board for ${ui.colors.cyan('Claude Code')}, ${ui.colors.blue('Grok')}, ${ui.colors.green('Gemini Antigravity')} & local LLMs`)
-      .add('By Iván Olivares (https://iolivares.com) · Implements vercel/board SPEC.md')
+      .heading('Local Multi-Agent Board CLI (lb) — MIT')
+      .add(`Specification-aligned local board for ${ui.colors.cyan('Claude Code')}, ${ui.colors.blue('Grok')}, ${ui.colors.green('Gemini CLI')} & local LLMs`)
+      .add('By Iván Olivares (https://iolivares.com) · Board v1 Specification')
       .render();
 
     const tbl = ui.table();
     tbl
       .head(['Command', 'Description'])
-      .row(['lvb serve | ui [--port 4100] [--dir .board] [--attach]', 'Run SPEC-aligned local board server + web UI on 127.0.0.1:4100'])
-      .row(['lvb attach [--url <url>] [--as <name>]', 'Attach interactive @poppinss/cliui REPL with live SSE stream'])
-      .row(['lvb setup [--channel <ch>] [--handshake]', 'Generate .local-board env & agent prompt files (replaces setup-board.sh)'])
-      .row(['lvb conformance [--channel conformance]', 'Verify live SPEC.md protocol compliance against the local board'])
-      .row(['lvb whoami | actors | status | ping [agent]', 'Inspect identity (x-board-profile), actors, and board health'])
-      .row(['lvb channels [list | create <ch>]', 'List or pre-create channels'])
-      .row(['lvb read [ch|id] [--label k=v] [--text q]', 'Read channel threads or a full thread by ID'])
-      .row(['lvb post <ch> "<text>" | reply <id> "<text>"', 'Post or reply (supports --label, --attach, --idempotency-key, --as)'])
-      .row(['lvb edit | delete | react | label <id> ...', 'Mutate messages, reactions, and labels with optimistic guards'])
-      .row(['lvb tasks [create|claim|renew|release|complete|fail|block|unblock|reopen|assign|needs|cancel]', 'Full SPEC task queue with 5m leases, epoch/tokens & dependencies'])
-      .row(['lvb tail [ch] | wait [target] [--after <cursor>]', 'Follow SSE events or block until next matching event'])
+      .row(['lb serve | ui [--port 4100] [--dir .board] [--attach]', 'Run local board server + web inspector on 127.0.0.1:4100'])
+      .row(['lb attach [--url <url>] [--as <name>]', 'Attach interactive @poppinss/cliui TUI with live SSE stream'])
+      .row(['lb setup [--channel <ch>] [--handshake]', 'Generate .local-board env & agent prompt files (replaces setup-board.sh)'])
+      .row(['lb conformance [--channel conformance]', 'Verify live Board v1 Specification compliance against the local board'])
+      .row(['lb whoami | actors | status | ping [agent]', 'Inspect identity (x-board-profile), actors, and board health'])
+      .row(['lb channels [list | create <ch>]', 'List or pre-create channels'])
+      .row(['lb read [ch|id] [--label k=v] [--text q]', 'Read channel threads or a full thread by ID'])
+      .row(['lb post <ch> "<text>" | reply <id> "<text>"', 'Post or reply (supports --label, --attach, --idempotency-key, --as)'])
+      .row(['lb edit | delete | react | label <id> ...', 'Mutate messages, reactions, and labels with optimistic guards'])
+      .row(['lb tasks [create|claim|renew|release|complete|fail|block|unblock|reopen|assign|needs|cancel]', 'Full task queue with 5m leases, epoch/tokens & dependencies'])
+      .row(['lb tail [ch] | wait [target] [--after <cursor>]', 'Follow SSE events or block until next matching event'])
       .render();
     return;
   }
@@ -393,7 +393,7 @@ async function main() {
 
     if (!flags.port && verb === 'inspect' && (await isReachable(baseUrl))) {
       ui.sticker()
-        .heading('Local Vercel Board Inspector')
+        .heading('Local Multi-Agent Board Inspector')
         .add(`Inspector UI:  ${ui.colors.cyan(baseUrl)}`)
         .add(`Board API:     ${ui.colors.green(`${baseUrl}/api/board`)}`)
         .render();
@@ -402,10 +402,10 @@ async function main() {
 
     if (!flags.port && !flags.dir && verb === 'ui' && (await isReachable('http://localhost:3000'))) {
       ui.sticker()
-        .heading('Interactive Next.js Local Board Detected!')
+        .heading('Interactive Next.js Local Multi-Agent Board Detected!')
         .add(`Web Desktop UI:  ${ui.colors.cyan('http://localhost:3000')}`)
         .add(`Board API:       ${ui.colors.green('http://localhost:3000/api/board/state')}`)
-        .add(`Tip: run ${ui.colors.yellow('lvb serve --port 4100')} for a standalone SPEC.md daemon.`)
+        .add(`Tip: run ${ui.colors.yellow('lb serve --port 4100')} for a standalone local board daemon.`)
         .render();
 
       if (flags.attach) {
@@ -421,12 +421,12 @@ async function main() {
 
     const started = await startBoardServer({ port, dir });
     ui.sticker()
-      .heading('Local Vercel Board Server Running (SPEC.md aligned)')
+      .heading('Local Multi-Agent Board Server Running')
       .add(`Inspector Web UI:   ${ui.colors.cyan(started.url)}`)
       .add(`BOARD_URL:          ${ui.colors.green(started.boardUrl)}`)
       .add(`Events SSE Stream:  ${ui.colors.dim(`${started.boardUrl}/events`)}`)
-      .add(`Attach CLI:         ${ui.colors.yellow(`lvb attach --url ${started.url}`)}`)
-      .add(`Conformance Test:   ${ui.colors.yellow(`lvb conformance --url ${started.url}`)}`)
+      .add(`Attach CLI:         ${ui.colors.yellow(`lb attach --url ${started.url}`)}`)
+      .add(`Conformance Test:   ${ui.colors.yellow(`lb conformance --url ${started.url}`)}`)
       .render();
 
     if (flags.attach) {
@@ -440,7 +440,7 @@ async function main() {
       return;
     }
 
-    ui.logger.info('Press Ctrl+C to stop the Local Vercel Board server.');
+    ui.logger.info('Press Ctrl+C to stop the Local Multi-Agent Board server.');
     await new Promise((resolve) => {
       process.on('SIGINT', async () => {
         await started.close();
@@ -493,7 +493,7 @@ async function main() {
     const tbl = ui.table();
     tbl.head(['Agent', 'CLI Flavor', 'Latency', 'Status']);
     matched.forEach((a, i) => {
-      tbl.row([ui.colors.cyan(a.name), a.cliFlavor || 'local-lvb', `${5 + i * 3}ms`, ui.colors.green(a.status)]);
+      tbl.row([ui.colors.cyan(a.name), a.cliFlavor || 'local-lb', `${5 + i * 3}ms`, ui.colors.green(a.status)]);
     });
     tbl.render();
     return;
@@ -977,7 +977,7 @@ async function main() {
     return;
   }
 
-  ui.logger.error(`Unknown command: ${verb}. Run \`lvb help\` for usage.`);
+  ui.logger.error(`Unknown command: ${verb}. Run \`lb help\` for usage.`);
   process.exit(1);
 }
 

@@ -6,7 +6,7 @@ import type { BoardEvent } from '@/lib/board-types';
 export const dynamic = 'force-dynamic';
 
 /**
- * Blocking long-poll endpoint implementing `vercel board wait <channel|threadId> --json`.
+ * Blocking long-poll endpoint implementing `lb wait <channel|threadId> --json`.
  * External CLI agents (Claude Code, Grok, Gemini Antigravity) block here until an event arrives.
  */
 export async function GET(req: NextRequest) {

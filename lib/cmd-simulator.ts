@@ -10,8 +10,8 @@ export type PromptCommandResult =
   | { kind: 'output'; lines: PromptOutputLine[] }
   | { kind: 'clear' }
   | { kind: 'forward_vb_cli'; command: string }
-  | { kind: 'forward_lvb_cli'; command: string }
-  | { kind: 'enter_lvb_attach'; channel?: string; asActor?: string }
+  | { kind: 'forward_lb_cli'; command: string }
+  | { kind: 'enter_lb_attach'; channel?: string; asActor?: string }
   | { kind: 'run_swarm_demo'; lines: PromptOutputLine[] }
   | { kind: 'set_theme'; themeId: DesktopThemeId; lines: PromptOutputLine[] };
 
@@ -32,7 +32,7 @@ function buildPingOutput(target: string | undefined, state: BoardState): PromptO
   if (!target || target.toLowerCase() === 'all') {
     const lines: PromptOutputLine[] = [
       {
-        text: `Pinging local Vercel Board mesh (${agents.length} connected CLI agents) on 127.0.0.1:3000...`,
+        text: `Pinging Local Multi-Agent Board mesh (${agents.length} connected CLI agents) on 127.0.0.1:3000...`,
         tone: 'info',
       },
     ];
@@ -104,7 +104,7 @@ function buildStatusOutput(state: BoardState, activeChannel: string): PromptOutp
 
   const lines: PromptOutputLine[] = [
     {
-      text: `VERCEL BOARD LOCAL DAEMON STATUS — board="${state.boardName}"`,
+      text: `LOCAL MULTI-AGENT BOARD DAEMON STATUS — board="${state.boardName}"`,
       tone: 'info',
     },
     {
@@ -161,13 +161,15 @@ export function executePromptCommand(
 
   const lower = trimmed.toLowerCase();
 
-  // Real `lvb` / `local-vercel-board` CLI & interactive TUI
+  // Real `lb` / `local-board` CLI & interactive TUI
   if (
+    lower === 'lb' ||
+    lower.startsWith('lb ') ||
+    lower === 'local-board' ||
+    lower.startsWith('local-board ') ||
+    lower.startsWith('npx local-board') ||
     lower === 'lvb' ||
-    lower.startsWith('lvb ') ||
-    lower === 'local-vercel-board' ||
-    lower.startsWith('local-vercel-board ') ||
-    lower.startsWith('npx local-vercel-board')
+    lower.startsWith('lvb ')
   ) {
     const tokens = trimmed.split(/\s+/);
     const subIdx = tokens[0].toLowerCase() === 'npx' ? 2 : 1;
@@ -176,19 +178,18 @@ export function executePromptCommand(
       const asIdx = tokens.findIndex((t) => t === '--as');
       const chIdx = tokens.findIndex((t) => t === '--channel');
       return {
-        kind: 'enter_lvb_attach',
+        kind: 'enter_lb_attach',
         asActor: asIdx >= 0 ? tokens[asIdx + 1] : undefined,
         channel: chIdx >= 0 ? tokens[chIdx + 1] : undefined,
       };
     }
-    return { kind: 'forward_lvb_cli', command: trimmed };
+    return { kind: 'forward_lb_cli', command: trimmed };
   }
 
-  // Forward real `vb` or `vercel board` commands to /api/board/cli
+  // Forward real `vb` commands to /api/board/cli
   if (
     lower === 'vb' ||
-    lower.startsWith('vb ') ||
-    lower.startsWith('vercel board')
+    lower.startsWith('vb ')
   ) {
     return { kind: 'forward_vb_cli', command: trimmed };
   }
@@ -205,15 +206,15 @@ export function executePromptCommand(
     return {
       kind: 'output',
       lines: [
-        { text: 'Local Vercel Board Command Prompt — Available Commands:', tone: 'info' },
-        { text: '  lvb attach            Launch interactive @poppinss/cliui TUI session right here!', tone: 'ok' },
-        { text: '  lvb status | help     Run the real `lvb` CLI binary with @poppinss/cliui tables', tone: 'ok' },
-        { text: '  lvb conformance       Run 7 live Vercel Board SPEC.md conformance checks', tone: 'ok' },
-        { text: '  lvb setup | ping      Run real `lvb setup` or ping agents via `lvb ping`', tone: 'info' },
-        { text: '  lvb post <ch> "<msg>" Post live to a channel (e.g. lvb post agent-bridge "hi" --as grok)', tone: 'info' },
+        { text: 'Local Multi-Agent Board Command Prompt — Available Commands:', tone: 'info' },
+        { text: '  lb attach             Launch interactive @poppinss/cliui TUI session right here!', tone: 'ok' },
+        { text: '  lb status | help      Run the real `lb` CLI binary with @poppinss/cliui tables', tone: 'ok' },
+        { text: '  lb conformance        Run 7 live Board v1 Specification conformance checks', tone: 'ok' },
+        { text: '  lb setup | ping       Run real `lb setup` or ping agents via `lb ping`', tone: 'info' },
+        { text: '  lb post <ch> "<msg>"  Post live to a channel (e.g. lb post agent-bridge "hi" --as grok)', tone: 'info' },
         { text: '  ping [agent|all]      Ping connected CLI agents (e.g. ping claude-code)', tone: 'default' },
         { text: '  status | tasks        Inspect board bridge health & 5-minute lease queue', tone: 'default' },
-        { text: '  demo swarm            Run interactive 3-agent Vercel Board swarm demo', tone: 'default' },
+        { text: '  demo swarm            Run interactive 3-agent Local Multi-Agent Board swarm demo', tone: 'default' },
         { text: '  theme <name>          Switch scheme: teal | blue | desert | dark-slate', tone: 'default' },
         { text: '  cls / clear           Clear terminal screen', tone: 'dim' },
       ],
@@ -281,7 +282,7 @@ export function executePromptCommand(
       kind: 'run_swarm_demo',
       lines: [
         {
-          text: `Launching interactive 3-agent Vercel Board swarm in #${activeChannel}...`,
+          text: `Launching interactive 3-agent Local Multi-Agent Board swarm in #${activeChannel}...`,
           tone: 'info',
         },
         {
@@ -348,7 +349,7 @@ export function executePromptCommand(
         tone: 'error',
       },
       {
-        text: 'Type "help", "ping claude-code", "status", "demo swarm", or "vb whoami --as grok".',
+        text: 'Type "help", "lb status", "lb attach", "ping claude-code", "status", or "demo swarm".',
         tone: 'dim',
       },
     ],

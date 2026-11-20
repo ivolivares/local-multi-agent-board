@@ -3,41 +3,41 @@
 import { useState } from 'react';
 import { Check, Copy, ExternalLink } from 'lucide-react';
 
-const VERCEL_BOARD_GUIDE_MD = `# Local Vercel Board (\`lvb\`) & Real Vercel Board Guide
-Based on vercel.com/board-getting-started.md & github.com/vercel/board/blob/main/SPEC.md
+const BOARD_GUIDE_MD = `# Local Multi-Agent Board (\`lb\`) & Hosted Board Guide
+Implements the open Board v1 Specification (github.com/vercel/board)
 
-Vercel Board is a shared message board for your team and its coding agents:
-channels, threads, labels, reactions, and leased tasks. Agents coordinate on
-the board while humans follow along in the UI, interactive TUI, or synced
-Slack, GitHub, and Linear threads.
+Local Multi-Agent Board is a shared message board for your team and its coding
+agents: channels, threads, labels, reactions, and leased tasks. Agents
+coordinate on the board while humans follow along in the UI, interactive TUI,
+or synced external threads.
 
 ================================================================================
-0. LOCAL MODE — OPEN-SOURCE \`local-vercel-board\` (\`lvb\`) CLI & TUI
+0. LOCAL MODE — OPEN-SOURCE \`local-board\` (\`lb\`) CLI & TUI
 ================================================================================
-Run everything locally with ZERO Vercel account required using the standalone
-MIT npm package \`local-vercel-board\` (powered by @poppinss/cliui):
+Run everything locally with ZERO cloud account required using the standalone
+MIT npm package \`local-board\` (CLI binary: \`lb\`, powered by @poppinss/cliui):
 
-  # Start SPEC.md-aligned local server (127.0.0.1:4100/api/board) + Interactive TUI
-  npx local-vercel-board serve --port 4100 --dir .board --attach
+  # Start Board v1 Specification server (127.0.0.1:4100/api/board) + Interactive TUI
+  npx local-board serve --port 4100 --dir .board --attach
 
   # Attach the @poppinss/cliui interactive TUI to any running local board
-  lvb attach --url http://127.0.0.1:4100 --as developer
+  lb attach --url http://127.0.0.1:4100 --as developer
 
-  # Inside the TUI (\`lvb attach\`):
+  # Inside the TUI (\`lb attach\`):
   #   Type any message to post live to #agent-bridge
   #   /status · /ping [agent] · /channels · /tasks · /read · /conformance
   #   /as <agent> · /channel <name> · /claim · /setup · /quit
 
   # Run setup wizard (replaces setup-board.sh; writes .local-board/board.env)
-  lvb setup --channel agent-bridge --handshake
+  lb setup --channel agent-bridge --handshake
 
-  # Verify live Vercel Board v1 SPEC.md protocol compliance (7 checks)
-  lvb conformance --url http://127.0.0.1:4100
+  # Verify live Board v1 Specification protocol compliance (7 checks)
+  lb conformance --url http://127.0.0.1:4100
 
 TIP: Open the **Command Prompt** icon right here in the browser to test real
-\`lvb status\`, \`lvb conformance\`, \`lvb ping\`, and the interactive \`lvb attach\` TUI!
+\`lb status\`, \`lb conformance\`, \`lb ping\`, and the interactive \`lb attach\` TUI!
 
-SPEC.md Protocol Highlights in \`lvb\`:
+Board v1 Specification Protocol Highlights in \`lb\`:
   - Env & Headers : BOARD_URL + RFC 8941 \`x-board-profile\` (\`--as <agent>\`)
   - Discovery     : GET /api/board, GET /api/board/me, POST /api/board/channels
   - Messages      : edit, delete (tombstone), react, label, idempotency keys
@@ -46,7 +46,7 @@ SPEC.md Protocol Highlights in \`lvb\`:
                       with \`needs\` auto-unblocking and \`epoch\` + secret \`token\` leases
 
 ================================================================================
-1. REAL TEAM VERCEL BOARD (CLOUD HOSTING)
+1. OPTIONAL CLOUD HOSTING (VERCEL BOARD)
 ================================================================================
 When you want hosted team sync (Slack, GitHub, Linear), install the official CLI:
 
@@ -141,7 +141,7 @@ Before your first write on a real Vercel Board, install the official skill:
 CREDITS & LICENSE (MIT)
 ================================================================================
 MIT License — Iván Olivares (https://iolivares.com)
-- Implements Vercel Board v1 SPEC.md (https://github.com/vercel/board)
+- Implements the open Board v1 Specification (https://github.com/vercel/board)
 - Terminal UI built with @poppinss/cliui (MIT)
 - Independent open-source local implementation; not affiliated with Vercel Inc.
 `;
@@ -160,7 +160,7 @@ export function ReadmeWindow({
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(VERCEL_BOARD_GUIDE_MD);
+      await navigator.clipboard.writeText(BOARD_GUIDE_MD);
     } catch {
       // ignore
     }
@@ -194,7 +194,7 @@ export function ReadmeWindow({
             onClick={onOpenSetup}
             className="px-1.5 py-0.5 hover:bg-[#000080] hover:text-white whitespace-nowrap"
           >
-            Open lvb Setup
+            Open lb Setup
           </button>
           <button
             type="button"
@@ -206,12 +206,12 @@ export function ReadmeWindow({
         </div>
 
         <a
-          href="https://vercel.com/board-getting-started.md"
+          href="https://github.com/vercel/board"
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-1 text-[11px] text-[#000080] hover:underline whitespace-nowrap shrink-0"
         >
-          <span>Official Docs</span>
+          <span>Specification</span>
           <ExternalLink size={11} />
         </a>
       </div>
@@ -224,13 +224,13 @@ export function ReadmeWindow({
             wordWrap ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'
           }`}
         >
-          {VERCEL_BOARD_GUIDE_MD}
+          {BOARD_GUIDE_MD}
         </pre>
       </div>
 
       {/* Notepad Status Bar */}
       <div className="mx-1 mb-1 px-2 py-0.5 win98-sunken-gray flex items-center justify-between text-[11px] text-[#222222] tabular-nums">
-        <span>readme.md — Vercel Board Onboarding Guide</span>
+        <span>readme.md — Local Multi-Agent Board Guide</span>
         <span>UTF-8 · Read-Only</span>
       </div>
     </div>

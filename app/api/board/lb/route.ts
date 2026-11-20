@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { NextRequest, NextResponse } from 'next/server';
-import { parseAnsiToLines, validateLvbCommand } from '@/lib/lvb-runner';
+import { parseAnsiToLines, validateLbCommand } from '@/lib/lb-runner';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const check = validateLvbCommand(command);
+  const check = validateLbCommand(command);
   if (!check.ok) {
     return NextResponse.json(
       {
@@ -34,12 +34,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const lvbBin = path.join(
+  const lbBin = path.join(
     process.cwd(),
     'packages',
-    'local-vercel-board',
+    'local-board',
     'bin',
-    'lvb.mjs'
+    'lb.mjs'
   );
   const env: NodeJS.ProcessEnv = {
     ...process.env,
@@ -47,10 +47,10 @@ export async function POST(req: NextRequest) {
   };
   delete env.NO_COLOR;
 
-  // `lvb conformance` runs the real 7-check SPEC.md suite against an ephemeral SPEC server
+  // `lb conformance` runs the real 7-check Board v1 Specification suite against an ephemeral server
   if (check.verb === 'conformance') {
     const runnerCode = `
-      import { startBoardServer } from './packages/local-vercel-board/src/server.mjs';
+      import { startBoardServer } from './packages/local-board/src/server.mjs';
       import { execFile } from 'node:child_process';
       import { promisify } from 'node:util';
       const run = promisify(execFile);
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
         delete childEnv.NO_COLOR;
         const { stdout, stderr } = await run(
           process.execPath,
-          ['./packages/local-vercel-board/bin/lvb.mjs', 'conformance', '--url', started.url],
+          ['./packages/local-board/bin/lb.mjs', 'conformance', '--url', started.url],
           { env: childEnv, timeout: 10000 }
         );
         process.stdout.write(stdout || '');
@@ -101,18 +101,18 @@ export async function POST(req: NextRequest) {
       ? check.args
       : [...check.args, '--url', localOrigin];
 
-  // For `lvb setup`, run in an isolated temp folder so preview runs never clutter the repo
+  // For `lb setup`, run in an isolated temp folder so preview runs never clutter the repo
   let execCwd = process.cwd();
   let tempDir: string | null = null;
   if (check.verb === 'setup') {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lvb-preview-setup-'));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lb-preview-setup-'));
     execCwd = tempDir;
   }
 
   try {
     const { stdout, stderr } = await execFileAsync(
       process.execPath,
-      [lvbBin, ...finalArgs],
+      [lbBin, ...finalArgs],
       { cwd: execCwd, env, timeout: 10000 }
     );
     const raw = [stdout, stderr].filter(Boolean).join('\n').trimEnd();

@@ -517,7 +517,7 @@ export function createInitialBoardState(now = Date.now()): BoardState {
   ];
 
   return {
-    boardName: 'vercel-labs',
+    boardName: 'local-board',
     currentUser: 'ctate',
     nextSeq: 4,
     nextThreadNum: 847,
@@ -1689,7 +1689,7 @@ export function generateSetupScript(opts: {
 set -euo pipefail
 
 # ==============================================================================
-# Local Vercel Board Setup Script (No Vercel Account Required)
+# Local Multi-Agent Board Setup Script (No Cloud Account Required)
 # Interconnects Claude Code, Grok CLI, and Gemini Antigravity CLI in one channel
 # ==============================================================================
 
@@ -1734,7 +1734,7 @@ for AGENT in ${agents.join(' ')}; do
   cat > "\${PROMPT_DIR}/\${AGENT}.md" <<PLAYBOOK
 # Local Board Playbook (\${AGENT})
 You are connected to local board "\${BOARD_NAME}" at \${BOARD_URL}.
-Always pass \`--as \${AGENT}\` on every command. Do NOT use a Vercel account.
+Always pass \`--as \${AGENT}\` on every command. Do NOT require a cloud account.
 
 Commands:
 - Check identity:  node scripts/vb.mjs whoami --as \${AGENT} --json

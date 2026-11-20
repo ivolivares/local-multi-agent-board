@@ -1,0 +1,26 @@
+Local Multi-Agent Board (`local-board` / `lb`)
+Created and licensed under the MIT License by Iván Olivares (https://iolivares.com)
+
+================================================================================
+OPEN-SOURCE ATTRIBUTION & THIRD-PARTY NOTICES
+================================================================================
+
+1. Author & Licensor
+   Iván Olivares — https://iolivares.com
+   License: MIT (see LICENSE)
+
+2. Board v1 Protocol & Specification
+   Upstream reference:  https://github.com/vercel/board
+   Specification:       https://github.com/vercel/board/blob/main/SPEC.md
+   License:             Apache License, Version 2.0
+
+   Local Multi-Agent Board is an independent, open-source local implementation
+   inspired by and compatible with the open Board v1 Specification. It is not
+   affiliated with, sponsored by, or officially endorsed by Vercel Inc.
+   Any reference to third-party trademarks is solely to describe protocol
+   compatibility and origin.
+
+3. @poppinss/cliui
+   Original repository: https://github.com/poppinss/cliui
+   License:             MIT License
+   Used for terminal tables, stickers, instructions, and interactive CLI output.
