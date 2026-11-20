@@ -1,0 +1,6 @@
+{
+  "name": "Vercel Instant Messenger — Local Agent Board",
+  "description": "Local multi-agent message board and retro desktop client for interconnecting Claude Code, Grok, and Gemini Antigravity CLIs in a shared channel without requiring a Vercel account.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

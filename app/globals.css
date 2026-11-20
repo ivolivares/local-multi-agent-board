@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: var(--font-ui), Tahoma, "MS Sans Serif", Arial, sans-serif;
+    background-color: #008080;
+    color: #000000;
+  }
+}
+
+.font-ui {
+  font-family: var(--font-ui), Tahoma, "MS Sans Serif", Arial, sans-serif;
+}
+
+.font-editorial {
+  font-family: var(--font-editorial), Georgia, "Times New Roman", serif;
+}
+
+.font-code {
+  font-family: var(--font-code), "Courier New", monospace;
+}
+
+@layer components {
+  /* Classic Win98 3D beveled surfaces */
+  .win98-window {
+    background-color: #c0c0c0;
+    box-shadow:
+      inset 1px 1px 0px #dfdfdf,
+      inset -1px -1px 0px #0a0a0a,
+      inset 2px 2px 0px #ffffff,
+      inset -2px -2px 0px #808080,
+      2px 2px 0px rgba(0, 0, 0, 0.25);
+  }
+
+  .win98-raised {
+    background-color: #c0c0c0;
+    box-shadow:
+      inset 1px 1px 0px #ffffff,
+      inset -1px -1px 0px #0a0a0a,
+      inset 2px 2px 0px #dfdfdf,
+      inset -2px -2px 0px #808080;
+  }
+
+  .win98-button {
+    background-color: #c0c0c0;
+    box-shadow:
+      inset 1px 1px 0px #ffffff,
+      inset -1px -1px 0px #0a0a0a,
+      inset 2px 2px 0px #dfdfdf,
+      inset -2px -2px 0px #808080;
+  }
+
+  .win98-button:active:not(:disabled),
+  .win98-button-pressed {
+    background-color: #c0c0c0;
+    box-shadow:
+      inset 1px 1px 0px #0a0a0a,
+      inset -1px -1px 0px #ffffff,
+      inset 2px 2px 0px #808080,
+      inset -2px -2px 0px #dfdfdf;
+  }
+
+  .win98-button-primary {
+    background-color: #c0c0c0;
+    box-shadow:
+      0 0 0 1px #0a0a0a,
+      inset 1px 1px 0px #ffffff,
+      inset -1px -1px 0px #0a0a0a,
+      inset 2px 2px 0px #dfdfdf,
+      inset -2px -2px 0px #808080;
+  }
+
+  .win98-sunken {
+    background-color: #ffffff;
+    box-shadow:
+      inset 1px 1px 0px #808080,
+      inset -1px -1px 0px #ffffff,
+      inset 2px 2px 0px #0a0a0a,
+      inset -2px -2px 0px #dfdfdf;
+  }
+
+  .win98-sunken-dark {
+    background-color: #0b0f14;
+    box-shadow:
+      inset 1px 1px 0px #808080,
+      inset -1px -1px 0px #ffffff,
+      inset 2px 2px 0px #000000,
+      inset -2px -2px 0px #dfdfdf;
+  }
+
+  .win98-sunken-gray {
+    background-color: #c0c0c0;
+    box-shadow:
+      inset 1px 1px 0px #808080,
+      inset -1px -1px 0px #ffffff;
+  }
+
+  .win98-taskbar-active {
+    background-color: #d8d8d8;
+    background-image: radial-gradient(#ffffff 1px, transparent 0);
+    background-size: 2px 2px;
+    box-shadow:
+      inset 1px 1px 0px #0a0a0a,
+      inset -1px -1px 0px #ffffff,
+      inset 2px 2px 0px #808080,
+      inset -2px -2px 0px #dfdfdf;
+  }
+
+  .win98-title-active {
+    background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
+    color: #ffffff;
+  }
+
+  .win98-title-inactive {
+    background: linear-gradient(90deg, #808080 0%, #b5b5b5 100%);
+    color: #e6e6e6;
+  }
+
+  .win98-tab-active {
+    background-color: #c0c0c0;
+    box-shadow:
+      inset 1px 1px 0px #ffffff,
+      inset -1px 0px 0px #0a0a0a,
+      inset 2px 2px 0px #dfdfdf,
+      inset -2px 0px 0px #808080;
+  }
+
+  .win98-tab-inactive {
+    background-color: #b8b8b8;
+    box-shadow:
+      inset 1px 1px 0px #ffffff,
+      inset -1px 0px 0px #404040,
+      inset 2px 2px 0px #dfdfdf,
+      inset -2px 0px 0px #808080;
+  }
+}
+
+.win98-scroll::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+.win98-scroll::-webkit-scrollbar-track {
+  background-color: #dfdfdf;
+  background-image:
+    linear-gradient(45deg, #c0c0c0 25%, transparent 25%),
+    linear-gradient(-45deg, #c0c0c0 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #c0c0c0 75%),
+    linear-gradient(-45deg, transparent 75%, #c0c0c0 75%);
+  background-size: 2px 2px;
+}
+
+.win98-scroll::-webkit-scrollbar-thumb {
+  background-color: #c0c0c0;
+  box-shadow:
+    inset 1px 1px 0px #ffffff,
+    inset -1px -1px 0px #0a0a0a,
+    inset 2px 2px 0px #dfdfdf,
+    inset -2px -2px 0px #808080;
+}
+
+.win98-scroll::-webkit-scrollbar-button {
+  background-color: #c0c0c0;
+  height: 16px;
+  width: 16px;
+  box-shadow:
+    inset 1px 1px 0px #ffffff,
+    inset -1px -1px 0px #0a0a0a,
+    inset 2px 2px 0px #dfdfdf,
+    inset -2px -2px 0px #808080;
+}
